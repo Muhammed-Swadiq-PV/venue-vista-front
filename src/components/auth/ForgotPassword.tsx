@@ -1,37 +1,24 @@
+
+
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../../apiConfig';
 
-const OTPVerification: React.FC = () => {
-    const [otp, setOTP] = useState('');
-    const navigate = useNavigate(); // Initialize useNavigate hook
+const ForgotPassword: React.FC = () => {
+    const [email, setEmail] = useState('');
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setOTP(e.target.value);
+        setEmail(e.target.value);
     };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
-            const response = await axios.post(`${API_BASE_URL}/api/users/verify-otp`, { otp });
-            console.log('OTP verified successfully:', response.data);
-            // Handle success (e.g., show a success message)
-            // For example, navigate to a success page or redirect to the home page
-            navigate('/success'); // Redirect to a success page
-        } catch (error) {
-            console.error('Error verifying OTP:', error);
-            // Handle error (e.g., show an error message)
-        }
-    };
-
-    const handleResendOTP = async () => {
-        try {
-            const response = await axios.post(`${API_BASE_URL}/api/users/resend-otp`, { email: 'user@example.com' }); // Replace with actual email
-            console.log('OTP resent successfully:', response.data);
+            const response = await axios.post(`${API_BASE_URL}/api/users/forgot-password`, { email });
+            console.log('Password reset email sent:', response.data);
             // Handle success (e.g., show a success message)
         } catch (error) {
-            console.error('Error resending OTP:', error);
+            console.error('Error sending password reset email:', error);
             // Handle error (e.g., show an error message)
         }
     };
@@ -45,40 +32,33 @@ const OTPVerification: React.FC = () => {
                 <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
                     <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
                         <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
-                            OTP Verification
+                            Forgot Password
                         </h1>
                         <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
                             <div>
-                                <label htmlFor="otp" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Enter OTP</label>
+                                <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your email</label>
                                 <input
-                                    type="text"
-                                    name="otp"
-                                    id="otp"
-                                    value={otp}
+                                    type="email"
+                                    name="email"
+                                    id="email"
+                                    value={email}
                                     onChange={handleChange}
                                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                    placeholder="Enter OTP"
+                                    placeholder="name@company.com"
                                 />
                             </div>
 
-                            <div className="flex justify-between items-center mt-4">
+                            <div>
                                 <button
                                     type="submit"
                                     className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
                                 >
-                                    Verify OTP
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={handleResendOTP}
-                                    className="text-sm font-light text-gray-500 dark:text-gray-400 hover:underline focus:outline-none"
-                                >
-                                    Resend OTP
+                                    Send One-Time-Password
                                 </button>
                             </div>
                             <div>
                                 <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                                    Did not receive OTP? Check your email or <a href="/forgot-password" className="font-medium text-primary-600 hover:underline dark:text-primary-500">resend OTP</a>
+                                    Remember your password? <a href="/signin" className="font-medium text-primary-600 hover:underline dark:text-primary-500">Sign in here</a>
                                 </p>
                             </div>
                         </form>
@@ -89,4 +69,4 @@ const OTPVerification: React.FC = () => {
     );
 };
 
-export default OTPVerification;
+export default ForgotPassword;
