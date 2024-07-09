@@ -1,7 +1,7 @@
 //routes/userRoutes.tsx
 
 import React from "react";
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom';
 import Signin from "../components/auth/Signin";
 import Signup from "../components/auth/Signup";
 import ForgotPassword from "../components/auth/ForgotPassword";
