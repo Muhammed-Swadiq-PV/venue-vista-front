@@ -80,11 +80,11 @@ const Signin: React.FC = () => {
                                 </button>
                             </div>
                             <div className="flex justify-between items-center mt-4">
-                                <a href="/forgot-password" className="text-sm font-light text-gray-500 dark:text-gray-400">Forgot Password?</a>
+                                <a href="/auth/forgot-password" className="text-sm font-light text-gray-500 dark:text-gray-400">Forgot Password?</a>
                             </div>
                             <div>
                                 <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                                    Don't have an account? <a href="/signup" className="font-medium text-primary-600 hover:underline dark:text-primary-500">Sign up here</a>
+                                    Don't have an account? <a href="/auth/signup" className="font-medium text-primary-600 hover:underline dark:text-primary-500">Sign up here</a>
                                 </p>
                             </div>
 

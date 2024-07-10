@@ -6,6 +6,8 @@ import ImageThree from '../assets/events-assets/20230721-+224532-+TML2023+-+_DSC
 
 const images = [ImageOne, ImageTwo, ImageThree];
 
+
+
 const Home: React.FC = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -22,22 +24,24 @@ const Home: React.FC = () => {
       <header className="fixed top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-gray-100">
         {/* Logo */}
         <div className="flex items-center">
-          <a href="/" className="bg-clip-text text-transparent bg-gradient-to-r from-teal-600 to-teal-900">Venue-Vista</a>
+          <a href="/" className="font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-600 to-teal-900">
+            Venue-Vista
+          </a>
         </div>
 
         {/* Navigation Links */}
         <nav className="flex items-center space-x-48">
-          <a href="/user" className="text-gray-600 hover:text-gray-900">For User</a>
-          <a href="/organizer" className="text-gray-600 hover:text-gray-900">For Organizer</a>
+          <a href="/auth/signin" className="text-gray-600 hover:text-gray-900">For User</a>
+          <a href="/organizer/signin" className="text-gray-600 hover:text-gray-900">For Organizer</a>
         </nav>
 
         {/* Login Button */}
         <div>
           <a
-            href="/signin"
+            href="/"
             className="text-white bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-purple-300 dark:focus:ring-purple-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
           >
-            Login
+            Know more about us
           </a>
         </div>
       </header>
@@ -62,6 +66,12 @@ const Home: React.FC = () => {
             <p className="text-lg">
               Discover the ultimate event spaces tailored to your needs. From intimate gatherings to grand celebrations, our platform curates a selection of venues that promise to make your special occasion unforgettable. Explore unique locations, compare prices, and book effortlessly, all in one place.
             </p>
+            <a
+              href="/auth/signin"
+              className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mt-12 inline-block"
+            >
+              Sign In as User
+            </a>
           </div>
 
           {/* Right Side Content (for Organizers) */}
@@ -70,6 +80,12 @@ const Home: React.FC = () => {
             <p className="text-lg">
               Unlock the full potential of your event management business with our easy-to-use platform. Showcase your venues to a vast audience, receive bookings directly, and manage your calendar efficiently. Let us connect you with potential clients, transforming your business into a thriving success story.
             </p>
+            <a
+              href="/organizer/signin"
+              className="text-white bg-gradient-to-r from-green-500 via-green-600 to-green-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mt-4 inline-block"
+            >
+              Sign In as Organizer
+            </a>
           </div>
         </div>
       </section>
