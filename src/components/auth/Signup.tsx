@@ -1,17 +1,24 @@
 import React from 'react';
 import axios from 'axios';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-// import * as Yup from 'yup';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { API_BASE_URL } from '../../apiConfig';
-import SignupSchema from './validations/SignupSchema'; // Assuming the schema is in the same folder
+import SignupSchema from './validations/SignupSchema'; 
 
 const Signup: React.FC = () => {
   const handleSubmit = async (values: any) => {
     try {
       const response = await axios.post(`${API_BASE_URL}/api/users/signup`, values);
       console.log('Form submitted successfully:', response.data);
-    } catch (error) {
+      toast.success('Account created successfully!');
+    } catch (error: any) {
       console.error('Error submitting form:', error);
+      if (error.response && error.response.data.error === 'Email already exists') {
+        toast.error('Email already exists. Please sign in.');
+      } else {
+        toast.error('Failed to create account. Please try again.');
+      }
     }
   };
 
@@ -93,6 +100,7 @@ const Signup: React.FC = () => {
           </div>
         </div>
       </div>
+      <ToastContainer />
     </section>
   );
 };
