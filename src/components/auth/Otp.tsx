@@ -1,19 +1,31 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import axios from 'axios';
 import { useFormik } from 'formik';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../../apiConfig';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import OtpSchema from './validations/OtpSchema'; // Assuming you have a validation schema for OTP
+import OtpSchema from './validations/OtpSchema';
 
 const OtpPage: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // Retrieve email from query parameter
+    const searchParams = new URLSearchParams(location.search);
+    const userEmail = searchParams.get('email');
+
+    useEffect(() => {
+        if (!userEmail) {
+            // Handle case where email is not present
+            navigate('/auth/signup'); // Redirect to signup page if email is not found
+        }
+    }, [location.search, navigate, userEmail]);
 
     const handleSubmit = async (values: { otp: string }) => {
         try {
-            const response = await axios.post(`${API_BASE_URL}/api/users/verify-otp`, values);
+            const response = await axios.post(`${API_BASE_URL}/api/users/verify`, { ...values, email: userEmail });
             console.log('OTP submitted successfully:', response.data);
             toast.success('OTP verification successful!');
             setTimeout(() => {
@@ -26,6 +38,16 @@ const OtpPage: React.FC = () => {
             } else {
                 toast.error('Failed to verify OTP. Please try again.');
             }
+        }
+    };
+
+    const resendOtp = async () => {
+        try {
+            const response = await axios.post(`${API_BASE_URL}/api/users/resend-otp`, { email: userEmail });
+            toast.success('OTP resent successfully!');
+        } catch (error: any) {
+            console.error('Error resending OTP:', error);
+            toast.error('Failed to resend OTP. Please try again.');
         }
     };
 
@@ -77,7 +99,7 @@ const OtpPage: React.FC = () => {
                                     </button>
                                 </div>
                                 <div className="flex justify-between items-center mt-4">
-                                    <a href="/auth/resend-otp" className="text-sm font-light text-gray-500 dark:text-gray-400">Resend OTP</a>
+                                    <button onClick={resendOtp} className="text-sm font-light text-gray-500 dark:text-gray-400">Resend OTP</button>
                                 </div>
                                 <div>
                                     <p className="text-sm font-light text-gray-500 dark:text-gray-400">

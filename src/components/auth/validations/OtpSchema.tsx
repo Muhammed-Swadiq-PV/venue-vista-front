@@ -1,12 +1,11 @@
+// src/pages/user/validations/OtpSchema.ts
 import * as Yup from 'yup';
 
 const OtpSchema = Yup.object().shape({
-    email: Yup.string()
-    .email('Invalid email address')
-    .required('Required'),
-password: Yup.string()
-    .min(6, 'Password must be at least 6 characters')
-    .required('Required'),
+  otp: Yup.string()
+    .length(6, 'OTP must be exactly 6 digits')
+    .matches(/^[0-9]+$/, 'OTP must be a number')
+    .required('OTP is required'),
 });
 
 export default OtpSchema;

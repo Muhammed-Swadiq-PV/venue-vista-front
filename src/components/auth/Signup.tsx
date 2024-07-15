@@ -2,18 +2,26 @@ import React from 'react';
 import axios from 'axios';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import { API_BASE_URL } from '../../apiConfig';
-import SignupSchema from './validations/SignupSchema'; 
+import SignupSchema from './validations/SignupSchema';
+import { useNavigate } from 'react-router-dom';
 
 const Signup: React.FC = () => {
+  const navigate = useNavigate();
+
   const handleSubmit = async (values: any) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/users/signup`, values);
-      console.log('Form submitted successfully:', response.data);
-      toast.success('Account created successfully!');
+      // Storing data in sessionStorage
+      sessionStorage.setItem('signupData', JSON.stringify(values));
+
+      // Generating OTP and storing in sessionStorage
+      const otpResponse = await axios.post(`${API_BASE_URL}/api/users/signup`,  values);
+      sessionStorage.setItem('otp', otpResponse.data.otp);
+
+      toast.success('Please check your email for the OTP!');
+      navigate(`/auth/verify-otp?email=${values.email}`); // Navigate to OTP page with email as query param
     } catch (error: any) {
-      console.error('Error submitting form:', error);
+      console.error('Error during signup:', error);
       if (error.response && error.response.data.error === 'Email already exists') {
         toast.error('Email already exists. Please sign in.');
       } else {
@@ -92,7 +100,7 @@ const Signup: React.FC = () => {
                     Create an account
                   </button>
                   <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                    Already have an account? <a href="/auth/signin" className="font-medium text-primary-600 hover:underline dark:text-primary-500">Login here</a>
+                    Already have an account? <a href="/auth/verify-otp" className="font-medium text-primary-600 hover:underline dark:text-primary-500">Login here</a>
                   </p>
                 </Form>
               )}
