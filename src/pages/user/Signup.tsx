@@ -3,31 +3,77 @@ import axios from 'axios';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { toast, ToastContainer } from 'react-toastify';
 import { API_BASE_URL } from '../../apiConfig';
-import SignupSchema from './validations/SignupSchema';
+import SignupSchema from '../../components/auth/validations/SignupSchema';
 import { useNavigate } from 'react-router-dom';
+import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from "jwt-decode";
+
+interface DecodedToken {
+  email?: string; 
+  name?: string; 
+}
+
 
 const Signup: React.FC = () => {
   const navigate = useNavigate();
 
+  const handleGoogleSuccess = async (response: CredentialResponse) => {
+    try {
+      if (!response.credential) {
+        throw new Error('Google OAuth token not received');
+      }
+
+      console.log('Google Credential:', response.credential);
+      
+      // Decode the JWT token received from Google
+      const decodedToken: DecodedToken = jwtDecode(response.credential);
+      
+      // Extract email and name from the decoded token
+      const { email, name } = decodedToken;
+      // console.log(email, name ,'email and password from jwt token')
+      
+      if (!email || !name) {
+        throw new Error('Email or name not found in token');
+      }
+
+      const res = await axios.post(`${API_BASE_URL}/users/google-auth`, {
+        email,
+        name,
+      });
+      
+      toast.success('Signed up successfully with Google!');
+      navigate('/auth/home');
+    } catch (error: any) {
+      console.error('Google OAuth error:', error);
+      toast.error('Failed to sign up with Google. Please try again.');
+    }
+  };
+  
+
+
+  const handleGoogleFailure = () => {
+    toast.error('Google sign-in was unsuccessful. Please try again.');
+  };
+
   const handleSubmit = async (values: any) => {
     try {
-      // Storing data in sessionStorage
-      sessionStorage.setItem('signupData', JSON.stringify(values));
-
-      // Generating OTP and storing in sessionStorage
-      const otpResponse = await axios.post(`${API_BASE_URL}/api/users/signup`,  values);
-      sessionStorage.setItem('otp', otpResponse.data.otp);
-
+      const otpResponse = await axios.post(`${API_BASE_URL}/users/signup`, values);
       toast.success('Please check your email for the OTP!');
-      navigate(`/auth/verify-otp?email=${values.email}`); // Navigate to OTP page with email as query param
+      navigate(`/auth/verify-otp?email=${values.email}`);
     } catch (error: any) {
       console.error('Error during signup:', error);
       if (error.response && error.response.data.error === 'Email already exists') {
         toast.error('Email already exists. Please sign in.');
+      } else if (error.response && error.response.data.error === 'User already exists but is not verified. OTP has been sent.') {
+        navigate(`/auth/verify-otp?email=${values.email}`);
       } else {
         toast.error('Failed to create account. Please try again.');
       }
     }
+  };
+
+  const redirectToLogin = () => {
+    navigate('/auth/signin');
   };
 
   return (
@@ -100,11 +146,17 @@ const Signup: React.FC = () => {
                     Create an account
                   </button>
                   <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                    Already have an account? <a href="/auth/verify-otp" className="font-medium text-primary-600 hover:underline dark:text-primary-500">Login here</a>
+                    Already have an account? <button onClick={redirectToLogin} className="font-medium text-primary-600 hover:underline dark:text-primary-500">Login here</button>
                   </p>
                 </Form>
               )}
             </Formik>
+            <div className="mt-4">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleFailure}
+              />
+            </div>
           </div>
         </div>
       </div>

@@ -7,8 +7,18 @@ import AuthRoutes from '../routes/authRoutes' ;
 import OrganizerRoutes from '../routes/organizerRoutes';
 import AdminRoutes from '../routes/adminRoutes';
 
+// import { GoogleLogin } from '@react-oauth/google';
+
 const App: React.FC = () => {
     return (
+        // <GoogleLogin 
+        // onSuccess={credentialResponse => {
+        //     console.log(credentialResponse)
+        // }}
+        // onError={() => {
+        //     console.log('Login failed through google auth')
+        // }}
+        // />
         <Router>
             <Routes>
                 <Route path="/" element={<Home />} />

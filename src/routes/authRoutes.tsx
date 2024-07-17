@@ -2,10 +2,10 @@
 
 import React from "react";
 import { Routes, Route } from 'react-router-dom';
-import Signin from "../components/auth/Signin";
-import Signup from "../components/auth/Signup";
+import Signin from "../pages/user/Signin";
+import Signup from "../pages/user/Signup";
 import ForgotPassword from "../components/auth/ForgotPassword";
-import OTP from "../components/auth/Otp";
+import OTP from "../pages/user/Otp";
 
 
 const AuthRoutes: React.FC = () => {

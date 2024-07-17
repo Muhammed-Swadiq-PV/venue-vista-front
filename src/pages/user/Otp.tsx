@@ -6,7 +6,7 @@ import { API_BASE_URL } from '../../apiConfig';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import OtpSchema from './validations/OtpSchema';
+import OtpSchema from '../../components/auth/validations/OtpSchema';
 
 const OtpPage: React.FC = () => {
     const navigate = useNavigate();
@@ -15,7 +15,7 @@ const OtpPage: React.FC = () => {
     // Retrieve email from query parameter
     const searchParams = new URLSearchParams(location.search);
     const userEmail = searchParams.get('email');
-
+    // console.log(userEmail,'aswin')
     useEffect(() => {
         if (!userEmail) {
             // Handle case where email is not present
@@ -25,7 +25,7 @@ const OtpPage: React.FC = () => {
 
     const handleSubmit = async (values: { otp: string }) => {
         try {
-            const response = await axios.post(`${API_BASE_URL}/api/users/verify`, { ...values, email: userEmail });
+            const response = await axios.post(`${API_BASE_URL}/users/verify`, { ...values, email: userEmail });
             console.log('OTP submitted successfully:', response.data);
             toast.success('OTP verification successful!');
             setTimeout(() => {
@@ -41,16 +41,18 @@ const OtpPage: React.FC = () => {
         }
     };
 
-    const resendOtp = async () => {
+
+    const resendOtp = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        event.preventDefault(); 
+            // console.log(userEmail,'swadiq')
         try {
-            const response = await axios.post(`${API_BASE_URL}/api/users/resend-otp`, { email: userEmail });
+            const response = await axios.post(`${API_BASE_URL}/users/resend-otp`, { email: userEmail });
             toast.success('OTP resent successfully!');
         } catch (error: any) {
             console.error('Error resending OTP:', error);
             toast.error('Failed to resend OTP. Please try again.');
         }
     };
-
     const formik = useFormik({
         initialValues: {
             otp: '',

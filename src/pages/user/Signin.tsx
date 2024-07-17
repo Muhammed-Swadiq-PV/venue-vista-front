@@ -6,14 +6,14 @@ import { API_BASE_URL } from '../../apiConfig';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import SigninSchema from './validations/SigninSchema';
+import SigninSchema from '../../components/auth/validations/SigninSchema';
 
 const Signin: React.FC = () => {
     const navigate = useNavigate();
 
     const handleSubmit = async (values: { email: string; password: string }) => {
         try {
-            const response = await axios.post(`${API_BASE_URL}/api/users/signin`, values);
+            const response = await axios.post(`${API_BASE_URL}/users/signin`, values);
             console.log('Form submitted successfully:', response.data);
             toast.success('Sign-in successful!');
             setTimeout(() => {

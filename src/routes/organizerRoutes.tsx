@@ -1,9 +1,9 @@
 import React from "react";
 import { Routes, Route } from 'react-router-dom';
-import Signin from "../components/organizer/Org-Signin";
-import Signup from "../components/organizer/Org-Signup";
-import ForgotPassword from "../components/organizer/Org-ForgotPassword";
-import OTP from "../components/organizer/Org-Otp";
+import Signin from "../pages/organizer/Org-Signin";
+import Signup from "../pages/organizer/Org-Signup"
+import ForgotPassword from "../pages/organizer/Org-ForgotPassword";
+import OTP from "../pages/organizer/Org-Otp";
 
 const OrganizerRoutes: React.FC = () =>{
     return(

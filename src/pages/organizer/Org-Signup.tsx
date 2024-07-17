@@ -4,7 +4,7 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { API_BASE_URL } from '../../apiConfig';
-import SignupSchema from './validations/SignupSchema';
+import SignupSchema from '../../components/organizer/validations/SignupSchema';
 
 const Signup: React.FC = () => {
   const initialValues = {
