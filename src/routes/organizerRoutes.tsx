@@ -4,6 +4,7 @@ import Signin from "../pages/organizer/Org-Signin";
 import Signup from "../pages/organizer/Org-Signup"
 import ForgotPassword from "../pages/organizer/Org-ForgotPassword";
 import OTP from "../pages/organizer/Org-Otp";
+import CreateProfile from "../pages/organizer/Org-CreateProfile";
 
 const OrganizerRoutes: React.FC = () =>{
     return(
@@ -12,6 +13,7 @@ const OrganizerRoutes: React.FC = () =>{
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/verify-otp" element={<OTP />} />
+            <Route path="/create-profile" element={<CreateProfile />} />
         </Routes>
     )
 }

@@ -42,7 +42,7 @@ const Signup: React.FC = () => {
       });
       
       toast.success('Signed up successfully with Google!');
-      navigate('/organizer/profile');
+      navigate('/organizer/create-profile');
     } catch (error: any) {
       console.error('Google OAuth error:', error);
       toast.error('Failed to sign up with Google. Please try again.');
