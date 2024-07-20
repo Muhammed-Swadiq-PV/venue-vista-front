@@ -36,6 +36,10 @@ const Signin: React.FC = () => {
       }
 
       const res = await axios.post(`${API_BASE_URL}/organizer/signin-google`,{ email});
+
+      const { token } = res.data;
+      // Store the JWT token in localStorage
+      localStorage.setItem('token', token);
       
       toast.success('Signed in successfully with Google!');
       navigate('/organizer/profile');
@@ -52,6 +56,11 @@ const Signin: React.FC = () => {
   const handleSubmit = async (values: { email: string; password: string }) => {
     try {
       const response = await axios.post(`${API_BASE_URL}/organizer/signin`, values);
+
+      const { token } = response.data;
+      // Store the JWT token in localStorage
+      localStorage.setItem('token', token);
+
       console.log('Form submitted successfully:', response.data);
       toast.success('Sign-in successful!');
       setTimeout(() => {

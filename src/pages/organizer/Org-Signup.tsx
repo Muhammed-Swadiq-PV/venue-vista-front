@@ -40,8 +40,14 @@ const Signup: React.FC = () => {
         email,
         name,
       });
+
+      const { token } = res.data;
+
+      // Store the JWT token in localStorage
+      localStorage.setItem('token', token);
       
       toast.success('Signed up successfully with Google!');
+      
       navigate('/organizer/create-profile');
     } catch (error: any) {
       console.error('Google OAuth error:', error);

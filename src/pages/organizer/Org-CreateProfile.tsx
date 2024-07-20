@@ -59,7 +59,7 @@ const CreateProfile: React.FC = () => {
     const initialValues: FormValues = {
         eventHallName: '',
         phoneNumber: '',
-        state: '',
+        state: 'Kerala', // currently I am implementing data for only Kerala
         district: '',
         city: '',
         buildingFloor: '',
@@ -76,15 +76,15 @@ const CreateProfile: React.FC = () => {
         city: Yup.string().required('City is required'),
         buildingFloor: Yup.string().required('Building/Floor is required'),
         pincode: Yup.string().required('Pincode is required'),
-        ownerIdCard: Yup.mixed().required('Owner ID Card is required'),
-        eventHallLicense: Yup.mixed().required('Event Hall License is required'),
+        ownerIdCard: Yup.mixed().required('Owner ID Card is required').nullable(),
+        eventHallLicense: Yup.mixed().required('Event Hall License is required').nullable(),
     });
 
-    const handleSubmit = async (values: typeof initialValues, { setSubmitting }: any) => {
+    const handleSubmit = async (values: FormValues, { setSubmitting }: any) => {
         const formData = new FormData();
         Object.keys(values).forEach((key: string) => {
             const value = (values as any)[key];
-            if (value !== null) {
+            if (value) {
                 formData.append(key, value);
             }
         });
@@ -96,12 +96,12 @@ const CreateProfile: React.FC = () => {
                 },
             });
 
-            toast.success('Profile created successfully!');
+            toast.success('Profile created successfully!', { position: "top-center" });
             setSubmitting(false);
             navigate('/organizer/profile');
         } catch (error: any) {
             console.error('Error creating profile:', error);
-            toast.error('Failed to create profile. Please try again.');
+            toast.error('Failed to create profile. Please try again.', { position: "top-center" });
             setSubmitting(false);
         }
     };
@@ -111,6 +111,7 @@ const CreateProfile: React.FC = () => {
         setFieldValue('district', selectedDistrict);
         const citiesForSelectedDistrict = districtsToCities[selectedDistrict];
         setCities(citiesForSelectedDistrict || []);
+        setFieldValue('city', '');
     };
 
     return (
@@ -153,6 +154,19 @@ const CreateProfile: React.FC = () => {
                                             placeholder="Phone Number"
                                         />
                                         <ErrorMessage name="phoneNumber" component="div" className="text-red-500 text-sm" />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="state" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">State</label>
+                                        <Field
+                                            type="text"
+                                            name="state"
+                                            id="state"
+                                            value={values.state}
+                                            disabled
+                                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                            placeholder="State"
+                                        />
+                                        <ErrorMessage name="state" component="div" className="text-red-500 text-sm" />
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>

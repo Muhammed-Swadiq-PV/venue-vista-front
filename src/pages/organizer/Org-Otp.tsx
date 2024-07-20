@@ -26,6 +26,10 @@ const OtpPage: React.FC = () => {
     const handleSubmit = async (values: { otp: string }) => {
         try {
             const response = await axios.post(`${API_BASE_URL}/organizer/verify`, { ...values, email: organizerEmail });
+
+            const {token} = response.data;
+            localStorage.setItem('token', token);
+            
             console.log('OTP submitted successfully:', response.data);
             toast.success('OTP verification successful!');
             setTimeout(() => {
