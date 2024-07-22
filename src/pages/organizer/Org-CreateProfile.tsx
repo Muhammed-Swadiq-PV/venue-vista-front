@@ -89,10 +89,13 @@ const CreateProfile: React.FC = () => {
             }
         });
 
+        const token = localStorage.getItem('token');
+
         try {
             const response = await axios.post(`${API_BASE_URL}/organizer/create-profile`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
+                    'Authorization' : `Bearer ${token}` 
                 },
             });
 

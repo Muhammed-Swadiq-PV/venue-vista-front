@@ -1,6 +1,6 @@
 import React from "react";
 import { Routes, Route } from 'react-router-dom';
-import Signin from "../components/admin/Adm-Signin";
+import Signin from "../pages/admin/Adm-Signin";
 
 const AdminRouters: React.FC = () =>{
     return(
