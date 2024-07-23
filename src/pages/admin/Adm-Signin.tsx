@@ -30,6 +30,10 @@ const Signin: React.FC = () => {
     try {
       const response = await axios.post(`${API_BASE_URL}/admin/signin`, values);
       console.log('Form submitted successfully:', response.data);
+
+      const { token } = response.data;
+      localStorage.setItem('adminToken', token);
+
       toast.success('Sign-in successful!');
       setTimeout(() => {
         navigate('/admin/dashboard');

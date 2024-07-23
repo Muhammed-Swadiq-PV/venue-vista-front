@@ -27,6 +27,11 @@ const OtpPage: React.FC = () => {
         try {
             const response = await axios.post(`${API_BASE_URL}/users/verify`, { ...values, email: userEmail });
             console.log('OTP submitted successfully:', response.data);
+
+            //store jwt token in localstorage
+            const { token } = response.data;
+            localStorage.setItem('userToken', token);
+            
             toast.success('OTP verification successful!');
             setTimeout(() => {
                 navigate('/auth/home');

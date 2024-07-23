@@ -22,20 +22,23 @@ const Signin: React.FC = () => {
         throw new Error('Google OAuth token not received');
       }
 
-      console.log('Google Credential:', response.credential);
+      // console.log('Google Credential:', response.credential);
       
       // Decode the JWT token received from Google
       const decodedToken: DecodedToken = jwtDecode(response.credential);
       
       // Extract email and name from the decoded token
       const { email } = decodedToken;
-      console.log(email, 'email and password from jwt token');
+      // console.log(email, 'email and password from jwt token');
       
       if (!email) {
         throw new Error('Email not signed with google');
       }
 
       const res = await axios.post(`${API_BASE_URL}/users/signin-google`,{ email});
+      //store jwt token
+      const { token } = res.data;
+      localStorage.setItem('userToken', token);
       
       toast.success('Signed in successfully with Google!');
       navigate('/auth/home');
@@ -52,7 +55,11 @@ const Signin: React.FC = () => {
   const handleSubmit = async (values: { email: string; password: string }) => {
     try {
       const response = await axios.post(`${API_BASE_URL}/users/signin`, values);
-      console.log('Form submitted successfully:', response.data);
+      // console.log('Form submitted successfully:', response.data);
+      //store jwt token
+      const { token } = response.data;
+      localStorage.setItem('userToken', token);
+
       toast.success('Sign-in successful!');
       setTimeout(() => {
         navigate('/auth/home');

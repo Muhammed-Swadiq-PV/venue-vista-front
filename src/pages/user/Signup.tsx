@@ -40,6 +40,9 @@ const Signup: React.FC = () => {
         email,
         name,
       });
+
+      const { token } = res.data;
+      localStorage.setItem('userToken', token);
       
       toast.success('Signed up successfully with Google!');
       navigate('/auth/home');
