@@ -37,6 +37,19 @@ const UserManagement: React.FC = () => {
     fetchUsers();
   }, []);
 
+  const handleToggleBlock = async (userId: string, currentStatus: boolean) => {
+    try {
+      await axiosInstance.patch(`/admin/users/${userId}`, {
+        isBlocked: !currentStatus,
+      });
+      setUsers(users.map(user =>
+        user.id === userId ? { ...user, isBlocked: !currentStatus } : user
+      ));
+    } catch (error) {
+      console.error('Error updating user status:', error);
+    }
+  };
+
   return (
     <ErrorBoundary>
       <div className="flex flex-col min-h-screen">
@@ -53,6 +66,7 @@ const UserManagement: React.FC = () => {
                     <th className="px-4 py-2">Name</th>
                     <th className="px-4 py-2">Email</th>
                     <th className="px-4 py-2">Status</th>
+                    <th className="px-4 py-2">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -62,6 +76,14 @@ const UserManagement: React.FC = () => {
                       <td className="border px-4 py-2">{user.email}</td>
                       <td className="border px-4 py-2">
                         {user.isBlocked ? 'Blocked' : 'Active'}
+                      </td>
+                      <td className="border px-4 py-2">
+                        <button
+                          onClick={() => handleToggleBlock(user.id, user.isBlocked)}
+                          className={`px-4 py-2 text-white ${user.isBlocked ? 'bg-green-500' : 'bg-red-500'} rounded`}
+                        >
+                          {user.isBlocked ? 'Unblock' : 'Block'}
+                        </button>
                       </td>
                     </tr>
                   ))}
