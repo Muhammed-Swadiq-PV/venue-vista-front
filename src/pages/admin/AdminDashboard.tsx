@@ -2,7 +2,8 @@ import React, { Suspense, lazy } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Header from '../../components/admin/Header';
 import Footer from '../../components/admin/Footer';
-import SideMenu from '../../components/admin/SideMenu'; 
+import SideMenu from '../../components/admin/SideMenu';
+import ErrorBoundary from '../../components/ErrorBoundary';
 
 const UserManagement = lazy(() => import('./UserManagement'));
 const OrganizerManagement = lazy(() => import('./OrganizerManagement'));
@@ -15,10 +16,12 @@ const AdminDashboard: React.FC = () => {
                 <SideMenu />
                 <main className="flex-grow p-4">
                     <Suspense fallback={<div>Loading...</div>}>
-                        <Routes>
-                            <Route path="/admin/user-management" element={<UserManagement />} />
-                            <Route path="/admin/organizer-management" element={<OrganizerManagement />} />
-                        </Routes>
+                        <ErrorBoundary>
+                            <Routes>
+                                <Route path="/admin/user-management" element={<UserManagement />} />
+                                <Route path="/admin/organizer-management" element={<OrganizerManagement />} />
+                            </Routes>
+                        </ErrorBoundary>
                     </Suspense>
                 </main>
             </div>

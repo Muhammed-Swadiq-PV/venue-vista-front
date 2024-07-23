@@ -12,6 +12,7 @@ const AdminRouters: React.FC = () =>{
             <Route path="/dashboard/*" element={<AdminDashboard />}/>
             <Route path="/user-management" element={<UserManagement />}/>
             <Route path="/organizer-management" element={<OrganizerManagement />}/>
+            
         </Routes>
     )
 }

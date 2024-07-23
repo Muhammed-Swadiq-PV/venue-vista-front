@@ -5,6 +5,8 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { toast, ToastContainer } from 'react-toastify';
 import { API_BASE_URL } from '../../apiConfig';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { setAdminDetails } from '../../redux/slices/adminSlice';
 
 // Define the validation function
 const validate = (values: { email: string; password: string }) => {
@@ -25,14 +27,18 @@ const validate = (values: { email: string; password: string }) => {
 
 const Signin: React.FC = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleSubmit = async (values: { email: string; password: string }) => {
     try {
       const response = await axios.post(`${API_BASE_URL}/admin/signin`, values);
       console.log('Form submitted successfully:', response.data);
 
-      const { token } = response.data;
+      const { token, email } = response.data;
       localStorage.setItem('adminToken', token);
+
+      // Dispatch action to store admin details
+      dispatch(setAdminDetails({ email, token }));
 
       toast.success('Sign-in successful!');
       setTimeout(() => {
