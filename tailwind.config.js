@@ -5,7 +5,14 @@ module.exports = {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        'architects-daughter': ['"Architects Daughter"', 'cursive'],
+      },
+      colors:{
+        customBlue: '#6464ED',
+      },
+    },
   },
   plugins: [],
 }

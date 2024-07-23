@@ -11,7 +11,7 @@ import AdminRoutes from '../routes/adminRoutes';
 
 const App: React.FC = () => {
     return (
-
+< div className='bg-red-50'>
         <Router>
             <Routes>
                 <Route path="/" element={<Home />} />
@@ -20,6 +20,7 @@ const App: React.FC = () => {
                 <Route path="/admin/*" element={<AdminRoutes />} /> 
             </Routes>
         </Router>
+</div>
     );
 };
 
