@@ -29,7 +29,7 @@ const Home: React.FC = () => {
 
         {/* Navigation Links */}
         <nav className="hidden md:flex items-center space-x-8">
-          <a href="/auth/signin" className="text-gray-600 hover:text-gray-900">For User</a>
+          <a href="/user/signin" className="text-gray-600 hover:text-gray-900">For User</a>
           <a href="/organizer/signin" className="text-gray-600 hover:text-gray-900">For Organizer</a>
         </nav>
 
@@ -65,7 +65,7 @@ const Home: React.FC = () => {
               Discover the ultimate event spaces tailored to your needs. From intimate gatherings to grand celebrations, our platform curates a selection of venues that promise to make your special occasion unforgettable. Explore unique locations, compare prices, and book effortlessly, all in one place.
             </p>
             <a
-              href="/auth/signin"
+              href="/user/signin"
               className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mt-8 md:mt-12 inline-block"
             >
               Sign In as User

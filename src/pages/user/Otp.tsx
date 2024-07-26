@@ -19,7 +19,7 @@ const OtpPage: React.FC = () => {
     useEffect(() => {
         if (!userEmail) {
             // Handle case where email is not present
-            navigate('/auth/signup'); // Redirect to signup page if email is not found
+            navigate('/user/signup'); // Redirect to signup page if email is not found
         }
     }, [location.search, navigate, userEmail]);
 
@@ -34,7 +34,7 @@ const OtpPage: React.FC = () => {
             
             toast.success('OTP verification successful!');
             setTimeout(() => {
-                navigate('/auth/home');
+                navigate('/user/home');
             }, 1000);
         } catch (error: any) {
             console.error('Error submitting OTP:', error);
@@ -110,7 +110,7 @@ const OtpPage: React.FC = () => {
                                 </div>
                                 <div>
                                     <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                                        Back to <a href="/auth/signup" className="font-medium text-primary-600 hover:underline dark:text-primary-500">Signup</a>
+                                        Back to <a href="/user/signup" className="font-medium text-primary-600 hover:underline dark:text-primary-500">Signup</a>
                                     </p>
                                 </div>
                             </Form>

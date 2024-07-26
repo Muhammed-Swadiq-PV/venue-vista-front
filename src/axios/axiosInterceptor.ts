@@ -13,7 +13,19 @@ const axiosInstance = axios.create({
 // Request interceptor for adding the token
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('adminToken'); // Adjust this based on user role
+    const adminToken = localStorage.getItem('adminToken'); 
+    const userToken  = localStorage.getItem('userToken');
+    const organizerToken = localStorage.getItem('token');
+
+    let token = '';
+    if (adminToken) {
+      token = adminToken;
+    }else if (userToken) {
+      token = userToken;
+    } else if (organizerToken) {
+      token = organizerToken;
+    }
+    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

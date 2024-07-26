@@ -130,7 +130,7 @@ const Signin: React.FC = () => {
                 </Form>
               )}
             </Formik>
-            <div className="mt-4">
+            <div className="flex justify-center mt-4">
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 onError={handleGoogleFailure}

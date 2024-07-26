@@ -41,7 +41,7 @@ const Signin: React.FC = () => {
       localStorage.setItem('userToken', token);
       
       toast.success('Signed in successfully with Google!');
-      navigate('/auth/home');
+      navigate('/user/home');
     } catch (error: any) {
       console.error('Google OAuth error:', error);
       toast.error('Failed to sign in with Google. Please try again.');
@@ -62,7 +62,7 @@ const Signin: React.FC = () => {
 
       toast.success('Sign-in successful!');
       setTimeout(() => {
-        navigate('/auth/home');
+        navigate('/user/home');
       }, 1000);
     } catch (error: any) {
       console.error('Error submitting form:', error);
@@ -123,12 +123,12 @@ const Signin: React.FC = () => {
                     {isSubmitting ? 'Signing in...' : 'Sign In'}
                   </button>
                   <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                    Don't have an account? <a href="/auth/signup" className="font-medium text-primary-600 hover:underline dark:text-primary-500">Sign up here</a>
+                    Don't have an account? <a href="/user/signup" className="font-medium text-primary-600 hover:underline dark:text-primary-500">Sign up here</a>
                   </p>
                 </Form>
               )}
             </Formik>
-            <div className="mt-4">
+            <div className="flex justify-center mt-4">
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 onError={handleGoogleFailure}

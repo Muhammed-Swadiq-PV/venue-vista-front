@@ -23,7 +23,7 @@ const Signup: React.FC = () => {
         throw new Error('Google OAuth token not received');
       }
 
-      console.log('Google Credential:', response.credential);
+      // console.log('Google Credential:', response.credential);
       
       // Decode the JWT token received from Google
       const decodedToken: DecodedToken = jwtDecode(response.credential);
@@ -43,12 +43,16 @@ const Signup: React.FC = () => {
 
       const { token } = res.data;
 
+      if(!token){
+        throw new Error('Token not received from server');
+      }
+
       // Store the JWT token in localStorage
       localStorage.setItem('token', token);
       
       toast.success('Signed up successfully with Google!');
       
-      navigate('/organizer/create-profile');
+      navigate('/organizer/signin');
     } catch (error: any) {
       console.error('Google OAuth error:', error);
       toast.error('Failed to sign up with Google. Please try again.');
@@ -157,7 +161,7 @@ const Signup: React.FC = () => {
                 </Form>
               )}
             </Formik>
-            <div className="mt-4">
+            <div className="flex justify-center mt-4">
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 onError={handleGoogleFailure}

@@ -45,7 +45,7 @@ const Signup: React.FC = () => {
       localStorage.setItem('userToken', token);
       
       toast.success('Signed up successfully with Google!');
-      navigate('/auth/home');
+      navigate('/user/home');
     } catch (error: any) {
       console.error('Google OAuth error:', error);
       toast.error('Failed to sign up with Google. Please try again.');
@@ -62,13 +62,13 @@ const Signup: React.FC = () => {
     try {
       const otpResponse = await axios.post(`${API_BASE_URL}/users/signup`, values);
       toast.success('Please check your email for the OTP!');
-      navigate(`/auth/verify-otp?email=${values.email}`);
+      navigate(`/user/verify-otp?email=${values.email}`);
     } catch (error: any) {
       console.error('Error during signup:', error);
       if (error.response && error.response.data.error === 'Email already exists') {
         toast.error('Email already exists. Please sign in.');
       } else if (error.response && error.response.data.error === 'User already exists but is not verified. OTP has been sent.') {
-        navigate(`/auth/verify-otp?email=${values.email}`);
+        navigate(`/user/verify-otp?email=${values.email}`);
       } else {
         toast.error('Failed to create account. Please try again.');
       }
@@ -76,7 +76,7 @@ const Signup: React.FC = () => {
   };
 
   const redirectToLogin = () => {
-    navigate('/auth/signin');
+    navigate('/user/signin');
   };
 
   return (
@@ -154,7 +154,7 @@ const Signup: React.FC = () => {
                 </Form>
               )}
             </Formik>
-            <div className="mt-4">
+            <div className="flex justify-center mt-4">
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 onError={handleGoogleFailure}

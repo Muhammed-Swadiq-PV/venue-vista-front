@@ -5,6 +5,9 @@ import { toast, ToastContainer } from 'react-toastify';
 import { API_BASE_URL } from '../../apiConfig';
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
+import { storage } from '../../firebaseConfig';
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+
 
 interface FormValues {
     eventHallName: string;
@@ -76,29 +79,59 @@ const CreateProfile: React.FC = () => {
         city: Yup.string().required('City is required'),
         buildingFloor: Yup.string().required('Building/Floor is required'),
         pincode: Yup.string().required('Pincode is required'),
-        ownerIdCard: Yup.mixed().required('Owner ID Card is required').nullable(),
-        eventHallLicense: Yup.mixed().required('Event Hall License is required').nullable(),
+        ownerIdCard: Yup.mixed()
+        .required('Owner ID Card is required')
+        .test('fileType', 'Unsupported File Format', value => {
+            return value && value instanceof File; // ensure it's a file
+        }),
+        eventHallLicense: Yup.mixed()
+        .required('Event Hall License is required')
+        .test('fileType', 'Unsupported File Format', value => {
+            return value && value instanceof File; // ensure it's a file
+        }),
     });
+ 
 
     const handleSubmit = async (values: FormValues, { setSubmitting }: any) => {
-        const formData = new FormData();
-        Object.keys(values).forEach((key: string) => {
-            const value = (values as any)[key];
-            if (value) {
-                formData.append(key, value);
-            }
-        });
-
-        const token = localStorage.getItem('token');
-
+        // const formData = new FormData();
+        let ownerIdCardUrl: string | null = null;
+        let eventHallLicenseUrl: string | null = null;
+    
         try {
-            const response = await axios.post(`${API_BASE_URL}/organizer/create-profile`, formData, {
+            if (values.ownerIdCard) {
+                const ownerIdCardRef = ref(storage, `ownerIdCards/${values.ownerIdCard.name}`);
+                await uploadBytes(ownerIdCardRef, values.ownerIdCard);
+                ownerIdCardUrl = await getDownloadURL(ownerIdCardRef);
+                console.log(ownerIdCardUrl , 'ownercardurl')
+            }
+
+            if (values.eventHallLicense) {
+                const eventHallLicenseRef = ref(storage, `eventHallLicenses/${values.eventHallLicense.name}`);
+                await uploadBytes(eventHallLicenseRef, values.eventHallLicense);
+                eventHallLicenseUrl = await getDownloadURL(eventHallLicenseRef);
+                console.log(eventHallLicenseUrl, 'event hall license url')
+            }
+
+            const profileData = {
+                eventHallName: values.eventHallName,
+                phoneNumber: values.phoneNumber,
+                district: values.district,
+                city: values.city,
+                buildingFloor: values.buildingFloor,
+                pincode: values.pincode,
+                ownerIdCardUrl: ownerIdCardUrl ,
+                eventHallLicenseUrl: eventHallLicenseUrl 
+            };
+    
+            const token = localStorage.getItem('token');
+            console.log(profileData, 'profiledata')
+            const response = await axios.post(`${API_BASE_URL}/organizer/create-profile`, profileData, {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
-                    'Authorization' : `Bearer ${token}` 
+                    // 'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${token}`,
                 },
             });
-
+    
             toast.success('Profile created successfully!', { position: "top-center" });
             setSubmitting(false);
             navigate('/organizer/profile');

@@ -6,6 +6,8 @@ import Signin from "../pages/user/Signin";
 import Signup from "../pages/user/Signup";
 import ForgotPassword from "../components/auth/ForgotPassword";
 import OTP from "../pages/user/Otp";
+import UHome from "../pages/user/U-Home";
+import PrivateRoute from "../components/auth/PrivateRoute";
 
 
 const AuthRoutes: React.FC = () => {
@@ -15,6 +17,9 @@ const AuthRoutes: React.FC = () => {
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/verify-otp" element={<OTP />} />
+            <Route element={<PrivateRoute/>}>
+            <Route path="/home" element={<UHome />} />
+            </Route>
         </Routes>
     )
 }
