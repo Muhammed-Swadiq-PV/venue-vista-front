@@ -7,7 +7,7 @@ export const useHandleSignOut = () => {
 
   const handleSignOut = async () => {
     try { 
-      localStorage.removeItem('userToken');
+      localStorage.removeItem('token');
       navigate('/');
       toast.success('Successfully signed out.');
     } catch (error) {

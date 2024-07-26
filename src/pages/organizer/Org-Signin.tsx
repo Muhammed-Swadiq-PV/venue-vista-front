@@ -42,7 +42,7 @@ const Signin: React.FC = () => {
       localStorage.setItem('token', token);
       
       toast.success('Signed in successfully with Google!');
-      navigate('/organizer/profile');
+      navigate('/organizer/home');
     } catch (error: any) {
       console.error('Google OAuth error:', error);
       toast.error('Failed to sign in with Google. Please try again.');
@@ -64,7 +64,7 @@ const Signin: React.FC = () => {
       console.log('Form submitted successfully:', response.data);
       toast.success('Sign-in successful!');
       setTimeout(() => {
-        navigate('/organizer/profile');
+        navigate('/organizer/home');
       }, 1000);
     } catch (error: any) {
       console.error('Error submitting form:', error);
