@@ -8,6 +8,7 @@ import CreateProfile from "../pages/organizer/Org-CreateProfile";
 import PrivateRoute from "../components/organizer/PrivateRoute";
 import Home from "../pages/organizer/Home";
 import PublicRouteOrg from "../components/organizer/PublicRoutes";
+import OrgPostForm from "../pages/organizer/Org-Post";
 
 
 const OrganizerRoutes: React.FC = () =>{
@@ -22,6 +23,7 @@ const OrganizerRoutes: React.FC = () =>{
             <Route element={< PrivateRoute/>}>
             <Route path="/create-profile" element={<CreateProfile />} />
             <Route path="/home" element={<Home />}/>
+            <Route path='/post' element={< OrgPostForm />}/>
             </Route>
         </Routes>
     )

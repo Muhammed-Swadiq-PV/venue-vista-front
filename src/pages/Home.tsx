@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
 import ImageOne from '../assets/events-assets/230721-224809-TML23-PZA02708-Enhanced-NR-HR-JT_PKZ-min.jpg';
 import ImageTwo from '../assets/events-assets/230722-005512-TML23-DN201210-Enhanced-NR-DN-min.jpg';
 import ImageThree from '../assets/events-assets/20230721-+224532-+TML2023+-+_DSC2440-MT-min.jpg';
@@ -45,7 +44,7 @@ const Home: React.FC = () => {
       </header>
 
       {/* Main Content */}
-      <section className="relative h-screen overflow-hidden">
+      <section className="relative h-screen overflow-auto">
         {/* Image Slider */}
         <div className="absolute inset-0 flex items-center justify-center">
           <img
@@ -53,6 +52,7 @@ const Home: React.FC = () => {
             alt={`Event Image ${currentImageIndex + 1}`}
             className="absolute inset-0 w-full h-full object-cover"
             style={{ filter: 'brightness(0.5)' }} // Apply a slight shadow with reduced brightness
+            loading="lazy" // Native lazy loading
           />
         </div>
 

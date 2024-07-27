@@ -1,41 +1,47 @@
-// src/components/ImageUploader/ImageUploader.tsx
-import React, { useState } from 'react';
-import imageCompression from 'browser-image-compression';
+import React, { useRef } from 'react';
 
-const ImageUploader: React.FC<{ onUpload: (file: File) => void }> = ({ onUpload }) => {
-  const [preview, setPreview] = useState<string>('');
+const ImageUploader: React.FC<{ onUpload: (files: File[]) => void; maxImages: number }> = ({ onUpload, maxImages }) => {
+  const workerRef = useRef<Worker | null>(null);
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const imageFile = event.target.files?.[0];
-    if (!imageFile) {
-      return;
-    }
-
-    try {
-      const options = {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1920,
-        useWebWorker: true,
+  React.useEffect(() => {
+    if (typeof Worker !== 'undefined') {
+      workerRef.current = new Worker(new URL('./imageCompressionWorker.ts', import.meta.url), { type: 'module' });
+      workerRef.current.onmessage = (event) => {
+        const { compressedImageBlob } = event.data;
+        onUpload([compressedImageBlob as unknown as File]);
       };
+    }
+    return () => {
+      workerRef.current?.terminate();
+    };
+  }, [onUpload]);
 
-      const compressedFile = await imageCompression(imageFile, options);
-
-      // Convert the compressed file to a blob URL for preview
-      const blobUrl = URL.createObjectURL(compressedFile);
-      setPreview(blobUrl);
-
-      // Call the onUpload callback with the compressed file
-      onUpload(compressedFile);
-    } catch (error) {
-      console.error('Error occurred while compressing image:', error);
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length > 0) {
+      const selectedFiles = files.slice(0, maxImages);
+      selectedFiles.forEach((file) => {
+        if (workerRef.current) {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const imageData = reader.result;
+            if (typeof imageData === 'string' || imageData instanceof ArrayBuffer) {
+              workerRef.current?.postMessage({ imageData });
+            }
+          };
+          reader.readAsArrayBuffer(file);
+        }
+      });
     }
   };
 
   return (
-    <div>
-      <input type="file" accept="image/*" onChange={handleImageUpload} />
-      {preview && <img src={preview} alt="Preview" />}
-    </div>
+    <input
+      type="file"
+      onChange={handleFileChange}
+      accept="image/*"
+      multiple={maxImages > 1}
+    />
   );
 };
 

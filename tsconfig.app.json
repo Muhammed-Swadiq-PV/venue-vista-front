@@ -24,7 +24,10 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+
+    /* Additional types */
+    "types": ["react", "node", "vite/client"]
   },
   "include": ["src", "src/routes"]
 }

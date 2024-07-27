@@ -3,6 +3,7 @@ import Header from '../../components/organizer/Header';
 import Footer from '../../components/organizer/Footer';
 import { useHandleSignOut } from '../../components/organizer/SignOut';
 import ErrorBoundary from '../../components/ErrorBoundary';
+import { useNavigate } from 'react-router-dom';
 import ImageOne from '../../assets/organizer-assets/warm-welcoming-atmosphere-as-guests-arrive-party-venue.jpg';
 import ImageTwo from '../../assets/organizer-assets/13134.jpg';
 
@@ -12,6 +13,12 @@ const LazyImage: React.FC<{ src: string; alt: string }> = ({ src, alt }) => (
 
 const Home: React.FC = () => {
   const handleSignOut = useHandleSignOut();
+
+  const navigate = useNavigate();
+
+  const handleButtonClick = () => {
+    navigate('/organizer/post');
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -33,10 +40,12 @@ const Home: React.FC = () => {
                   <h1 className="text-2xl text-center font-bold">Welcome to Venue-Vista</h1>
                   <p>
                     Welcome to Venue-Vista, the ultimate platform for discovering and booking event venues! As an organizer on Venue-Vista, you have the unique opportunity to showcase and manage event halls, helping individuals and businesses find the perfect spaces for their special occasions.
+                    you can post images of your hall here.
                   </p>
                   <div className='flex justify-center'>
-                  <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 ">
-                    Add your event hall details
+                  <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 "
+                  onClick={handleButtonClick}>
+                     Your event hall
                   </button>
                   </div>
                 </div>

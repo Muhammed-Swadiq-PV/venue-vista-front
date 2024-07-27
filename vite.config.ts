@@ -13,5 +13,16 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        format: 'es',
+      },
+    },
+    target: 'esnext', // Ensures the build uses the latest JavaScript features
+  },
+  optimizeDeps: {
+    // Ensure dependencies are properly optimized
+    include: ['image-compression']
+  }
 });
-
