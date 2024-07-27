@@ -5,12 +5,12 @@ import AdminDashboard from "../pages/admin/AdminDashboard";
 import UserManagement from "../pages/admin/UserManagement";
 import OrganizerManagement from "../pages/admin/OrganizerManagement";
 import PrivateRoute from "../components/admin/PrivateRoute";
-import PublicRoute from "../components/admin/PublicRoute";
+import PublicRouteAdm from "../components/admin/PublicRoute";
 
 const AdminRouters: React.FC = () =>{
     return(
         <Routes>
-            <Route element={<PublicRoute/>}>
+            <Route element={<PublicRouteAdm/>}>
             <Route path="/signin" element={<Signin />}/>
             </Route>
             <Route element={<PrivateRoute/>}>
