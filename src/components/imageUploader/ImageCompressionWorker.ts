@@ -1,32 +1,47 @@
-self.onmessage = async (event) => {
-    console.log('Received message:', event.data);
+// utils/imageCompression.ts
+export async function compressImage(file: File, maxWidth: number, maxHeight: number, quality: number): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
   
-    const { imageData } = event.data;
+          if (width > height) {
+            if (width > maxWidth) {
+              height *= maxWidth / width;
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width *= maxHeight / height;
+              height = maxHeight;
+            }
+          }
   
-    try {
-      console.log('Processing image data...');
-      const blob = new Blob([imageData]);
+          canvas.width = width;
+          canvas.height = height;
   
-      const imageBitmap = await createImageBitmap(blob);
-      console.log('ImageBitmap created.');
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
   
-      const canvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height);
-      const ctx = canvas.getContext('2d');
-  
-      if (!ctx) {
-        throw new Error('Failed to get OffscreenCanvasRenderingContext2D');
-      }
-  
-      ctx.drawImage(imageBitmap, 0, 0);
-      console.log('Image drawn on canvas.');
-  
-      const compressedImageBlob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.7 });
-      console.log('Image compressed.');
-  
-      self.postMessage({ compressedImageBlob });
-  
-    } catch (error) {
-      console.error('Error compressing image:', error);
-    }
-  };
-  
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                resolve(blob);
+              } else {
+                reject(new Error('Canvas to Blob conversion failed'));
+              }
+            },
+            'image/jpeg',
+            quality
+          );
+        };
+        img.src = event.target?.result as string;
+      };
+      reader.onerror = (error) => reject(error);
+      reader.readAsDataURL(file);
+    });
+  }

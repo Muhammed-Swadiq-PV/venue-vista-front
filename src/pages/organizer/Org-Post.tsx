@@ -2,6 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Formik, Form, Field, ErrorMessage, FieldArray } from 'formik';
 import * as Yup from 'yup';
 import ImageUploader from '../../components/imageUploader/ImageUploader';
+import axios from 'axios';
+import { API_BASE_URL } from '../../apiConfig';
+import { storage } from '../../firebaseConfig' ;
+import { ref, uploadBytes , getDownloadURL } from 'firebase/storage';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 // Define the type for form values
 interface VenueSection {
@@ -52,6 +58,7 @@ const initialValues: VenuePost = {
 
 // Component
 const OrgPostForm: React.FC = () => {
+    const navigate = useNavigate();
   const [imageURLs, setImageURLs] = useState<{ [key: string]: string[] }>({});
 
   useEffect(() => {
@@ -80,10 +87,67 @@ const OrgPostForm: React.FC = () => {
     });
   };
 
-  const handleSubmit = (values: VenuePost, { setSubmitting }: any) => {
+  const handleSubmit = async (values: VenuePost, { setSubmitting }: any) => {
     console.log('Form submitted:', values);
-    // Here you would typically send the data to your backend
-    setSubmitting(false);
+
+    const uploadImageToFirebase = async (file: File, section: keyof VenuePost) => {
+      const fileRef = ref(storage, `${section}/${file.name}`);
+      await uploadBytes(fileRef, file);
+      return await getDownloadURL(fileRef);
+    };
+
+    const sections: (keyof VenuePost)[] = ['main', 'parking', 'indoor', 'stage', 'dining'];
+    const imageUrls: { [key: string]: string[] } = {};
+
+    for (const section of sections) {
+      imageUrls[section] = [];
+      for (const file of values[section].images) {
+        const url = await uploadImageToFirebase(file, section);
+        imageUrls[section].push(url);
+      }
+    }
+
+    const postData = {
+      ...values,
+      main: {
+        ...values.main,
+        images: imageUrls.main,
+      },
+      parking: {
+        ...values.parking,
+        images: imageUrls.parking,
+      },
+      indoor: {
+        ...values.indoor,
+        images: imageUrls.indoor,
+      },
+      stage: {
+        ...values.stage,
+        images: imageUrls.stage,
+      },
+      dining: {
+        ...values.dining,
+        images: imageUrls.dining,
+      },
+    };
+
+    const token = localStorage.getItem('token'); 
+
+    try {
+      const response = await axios.post(`${API_BASE_URL}/organizer/create-post`, postData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      toast.success('Post created successfully!', { position: "top-center" });
+      setSubmitting(false);
+      navigate('/organizer/posts');
+    } catch (error: any) {
+      console.error('Error creating post:', error);
+      toast.error('Failed to create post. Please try again.', { position: "top-center" });
+      setSubmitting(false);
+    }
   };
 
   return (
