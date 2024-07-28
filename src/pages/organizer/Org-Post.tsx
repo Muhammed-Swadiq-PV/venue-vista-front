@@ -4,8 +4,12 @@ import * as Yup from 'yup';
 import ImageUploader from '../../components/imageUploader/ImageUploader';
 import axios from 'axios';
 import { API_BASE_URL } from '../../apiConfig';
-import { storage } from '../../firebaseConfig' ;
-import { ref, uploadBytes , getDownloadURL } from 'firebase/storage';
+import Header from '../../components/organizer/Header';
+import Footer from '../../components/organizer/Footer';
+import { useHandleSignOut } from '../../components/organizer/SignOut';
+import ErrorBoundary from '../../components/ErrorBoundary';
+import { storage } from '../../firebaseConfig';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
@@ -58,7 +62,11 @@ const initialValues: VenuePost = {
 
 // Component
 const OrgPostForm: React.FC = () => {
+
+    const handleSignOut = useHandleSignOut();
+
     const navigate = useNavigate();
+    
   const [imageURLs, setImageURLs] = useState<{ [key: string]: string[] }>({});
 
   useEffect(() => {
@@ -81,7 +89,7 @@ const OrgPostForm: React.FC = () => {
       const url = URL.createObjectURL(file);
       console.log(`Created object URL: ${url}`);
       setImageURLs(prev => ({
-        ...prev,
+       ...prev,
         [section]: [...(prev[section] || []), url]
       }));
     });
@@ -96,7 +104,7 @@ const OrgPostForm: React.FC = () => {
       return await getDownloadURL(fileRef);
     };
 
-    const sections: (keyof VenuePost)[] = ['main', 'parking', 'indoor', 'stage', 'dining'];
+    const sections: (keyof VenuePost)[] = ['main', 'parking', 'indoor','stage', 'dining'];
     const imageUrls: { [key: string]: string[] } = {};
 
     for (const section of sections) {
@@ -108,25 +116,25 @@ const OrgPostForm: React.FC = () => {
     }
 
     const postData = {
-      ...values,
+     ...values,
       main: {
-        ...values.main,
+       ...values.main,
         images: imageUrls.main,
       },
       parking: {
-        ...values.parking,
+       ...values.parking,
         images: imageUrls.parking,
       },
       indoor: {
-        ...values.indoor,
+       ...values.indoor,
         images: imageUrls.indoor,
       },
       stage: {
-        ...values.stage,
+       ...values.stage,
         images: imageUrls.stage,
       },
       dining: {
-        ...values.dining,
+       ...values.dining,
         images: imageUrls.dining,
       },
     };
@@ -151,65 +159,74 @@ const OrgPostForm: React.FC = () => {
   };
 
   return (
-    <Formik
-      initialValues={initialValues}
-      validationSchema={validationSchema}
-      onSubmit={handleSubmit}
-    >
-      {({ values, setFieldValue, isSubmitting }) => (
-        <Form className="max-w-4xl mx-auto p-4">
-          {Object.entries(values).map(([section, data]) => {
-            const sectionKey = section as keyof VenuePost;
+    <>
+    <Header onSignOut={handleSignOut} />
+   
+    <ErrorBoundary>
+    <div className="border border-gray-300 p-4 rounded-lg shadow-md max-w-4xl mx-auto">
+      <Formik
+        initialValues={initialValues}
+        validationSchema={validationSchema}
+        onSubmit={handleSubmit}
+      >
+        {({ values, setFieldValue, isSubmitting }) => (
+          <Form className="p-4">
+            {Object.entries(values).map(([section, data]) => {
+              const sectionKey = section as keyof VenuePost;
 
-            return (
-              <div key={sectionKey} className="mb-8">
-                <h2 className="text-2xl font-bold mb-4 capitalize">{sectionKey} Area</h2>
-                <FieldArray
-                  name={`${sectionKey}.images`}
-                  render={arrayHelpers => (
-                    <div className="mb-4">
-                      <ImageUploader
-                        onUpload={(files) => {
-                          handleImageUpload(files, sectionKey, arrayHelpers);
-                        }}
-                        maxImages={sectionKey === 'main' ? 1 : 4}
-                      />
-                      <ErrorMessage name={`${sectionKey}.images`} component="div" className="text-red-500" />
-                      <div className="flex flex-wrap gap-4 mt-4">
-                        {(imageURLs[sectionKey] || []).length ? (
-                          imageURLs[sectionKey].map((url, index) => (
-                            <div key={index} className="w-24 h-24 overflow-hidden border border-gray-300 rounded">
-                              <img src={url} alt={`Uploaded ${index + 1}`} className="w-full h-full object-cover" />
-                            </div>
-                          ))
-                        ) : (
-                          <p>No images available</p>
-                        )}
+              return (
+                <div key={sectionKey} className="mb-8">
+                  <h2 className="text-2xl font-bold mb-4 capitalize">{sectionKey} Area</h2>
+                  <FieldArray
+                    name={`${sectionKey}.images`}
+                    render={arrayHelpers => (
+                      <div className="mb-4">
+                        <ImageUploader
+                          onUpload={(files) => {
+                            handleImageUpload(files, sectionKey, arrayHelpers);
+                          }}
+                          maxImages={sectionKey ==='main'? 1 : 4}
+                        />
+                        <ErrorMessage name={`${sectionKey}.images`} component="div" className="text-red-500" />
+                        <div className="flex flex-wrap gap-4 mt-4">
+                          {(imageURLs[sectionKey] || []).length? (
+                            imageURLs[sectionKey].map((url, index) => (
+                              <div key={index} className="w-24 h-24 overflow-hidden border border-gray-300 rounded">
+                                <img src={url} alt={`Uploaded ${index + 1}`} className="w-full h-full object-cover" />
+                              </div>
+                            ))
+                          ) : (
+                            <p>No images available</p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                />
-                <Field
-                  as="textarea"
-                  name={`${sectionKey}.description`}
-                  placeholder={`${sectionKey} area description`}
-                  className="w-full p-2 border rounded"
-                  rows={4}
-                />
-                <ErrorMessage name={`${sectionKey}.description`} component="div" className="text-red-500" />
-              </div>
-            );
-          })}
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-blue-300"
-          >
-            Submit
-          </button>
-        </Form>
-      )}
-    </Formik>
+                    )}
+                  />
+                  <Field
+                    as="textarea"
+                    name={`${sectionKey}.description`}
+                    placeholder={`${sectionKey} area description`}
+                    className="w-full p-2 border rounded"
+                    rows={4}
+                  />
+                  <ErrorMessage name={`${sectionKey}.description`} component="div" className="text-red-500" />
+                </div>
+              );
+            })}
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-blue-300"
+            >
+              Submit
+            </button>
+          </Form>
+        )}
+      </Formik>
+    </div>
+    </ErrorBoundary>
+    <Footer />
+    </>
   );
 };
 

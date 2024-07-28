@@ -1,9 +1,11 @@
-import React, { Suspense } from 'react';
+import React, { Suspense , useEffect} from 'react';
 import Header from '../../components/organizer/Header';
 import Footer from '../../components/organizer/Footer';
 import { useHandleSignOut } from '../../components/organizer/SignOut';
 import ErrorBoundary from '../../components/ErrorBoundary';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../redux/store';
 import ImageOne from '../../assets/organizer-assets/warm-welcoming-atmosphere-as-guests-arrive-party-venue.jpg';
 import ImageTwo from '../../assets/organizer-assets/13134.jpg';
 
@@ -15,6 +17,17 @@ const Home: React.FC = () => {
   const handleSignOut = useHandleSignOut();
 
   const navigate = useNavigate();
+
+  const formData = useSelector((state: RootState) => state.form);
+
+
+  useEffect(() => {
+    const isFormDataComplete = formData.eventHallName && formData.phoneNumber && formData.district && formData.city && formData.buildingFloor && formData.pincode && formData.ownerIdCardUrl && formData.eventHallLicenseUrl;
+
+    if (!isFormDataComplete) {
+        navigate('/organizer/create-profile');
+    }
+}, [formData, navigate]);
 
   const handleButtonClick = () => {
     navigate('/organizer/post');

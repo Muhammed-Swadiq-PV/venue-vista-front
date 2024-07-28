@@ -33,7 +33,7 @@ const OtpPage: React.FC = () => {
             console.log('OTP submitted successfully:', response.data);
             toast.success('OTP verification successful!');
             setTimeout(() => {
-                navigate('/organizer/org-profile');
+                navigate('/organizer/create-profile');
             }, 1000);
         } catch (error: any) {
             console.error('Error submitting OTP:', error);
