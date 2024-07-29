@@ -7,8 +7,6 @@ import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
 import { storage } from '../../firebaseConfig';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { useDispatch, UseDispatch } from 'react-redux';
-import { setFormData } from '../../redux/slices/formSlice';
 
 
 interface FormValues {
@@ -59,8 +57,6 @@ const districtsToCities: { [key: string]: string[] } = {
 
 const CreateProfile: React.FC = () => {
     const navigate = useNavigate();
-    const dispatch = useDispatch();
-    
     const [cities, setCities] = useState<string[]>([]);
 
     const initialValues: FormValues = {
@@ -137,9 +133,8 @@ const CreateProfile: React.FC = () => {
             });
     
             toast.success('Profile created successfully!', { position: "top-center" });
-            dispatch(setFormData(profileData));
             setSubmitting(false);
-            navigate('/organizer/home');   
+            navigate('/organizer/home');
         } catch (error: any) {
             console.error('Error creating profile:', error);
             toast.error('Failed to create profile. Please try again.', { position: "top-center" });

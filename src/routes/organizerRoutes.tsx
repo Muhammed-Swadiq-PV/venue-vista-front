@@ -11,6 +11,7 @@ import PublicRouteOrg from "../components/organizer/PublicRoutes";
 import OrgPostForm from "../pages/organizer/Org-Post";
 
 
+
 const OrganizerRoutes: React.FC = () =>{
     return(
         <Routes>

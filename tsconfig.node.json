@@ -6,6 +6,7 @@
     "skipLibCheck": true,
     "module": "ESNext",
     "moduleResolution": "node",
+    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "noEmit": true
