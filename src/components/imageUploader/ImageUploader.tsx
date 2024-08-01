@@ -1,27 +1,32 @@
-import React from 'react';
-import { compressImage } from './ImageCompressionWorker';
+import React, { ChangeEvent } from 'react';
 
-const ImageUploader: React.FC<{ onUpload: (files: File[]) => void; maxImages: number }> = ({ onUpload, maxImages }) => {
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    if (files.length > 0) {
-      const selectedFiles = files.slice(0, maxImages);
-      const compressedFiles = await Promise.all(
-        selectedFiles.map(async (file) => {
-          const compressedBlob = await compressImage(file, 1920, 1080, 0.7);
-          return new File([compressedBlob], file.name, { type: 'image/jpeg' });
-        })
-      );
-      onUpload(compressedFiles);
+interface ImageUploaderProps {
+  onUpload: (files: File[]) => void;
+  maxImages: number;
+  fieldName: string;
+  setFieldValue: (field: string, value: any) => void;
+}
+
+const ImageUploader: React.FC<ImageUploaderProps> = ({ onUpload, maxImages, fieldName, setFieldValue }) => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      const files = Array.from(event.target.files);
+      if (files.length > maxImages) {
+        alert(`You can only upload up to ${maxImages} images.`);
+        return;
+      }
+      onUpload(files);
+      setFieldValue(fieldName, files);
     }
   };
 
   return (
     <input
       type="file"
-      onChange={handleFileChange}
       accept="image/*"
-      multiple={maxImages > 1}
+      multiple
+      onChange={handleChange}
+      className="border p-2"
     />
   );
 };

@@ -8,8 +8,6 @@ import Header from '../../components/organizer/Header';
 import Footer from '../../components/organizer/Footer';
 import { useHandleSignOut } from '../../components/organizer/SignOut';
 import ErrorBoundary from '../../components/ErrorBoundary';
-import { storage } from '../../firebaseConfig';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import Spinner from '../../components/Spinner';
@@ -31,23 +29,38 @@ interface VenuePost {
 // Validation schema
 const validationSchema = Yup.object().shape({
   main: Yup.object().shape({
-    images: Yup.array().min(1, 'Main image is required').max(1, 'Only one main image allowed'),
+    images: Yup.array()
+      .min(1, 'Main image is required')
+      .max(1, 'Only one main image allowed')
+      .required('Main image is required'),
     description: Yup.string().required('Main description is required'),
   }),
   parking: Yup.object().shape({
-    images: Yup.array().max(4, 'Maximum 4 images allowed for parking area'),
+    images: Yup.array()
+      .min(1, 'At least one image is required for the parking area')
+      .max(4, 'Maximum 4 images allowed for parking area')
+      .nullable(),
     description: Yup.string().required('Parking area description is required'),
   }),
   indoor: Yup.object().shape({
-    images: Yup.array().max(4, 'Maximum 4 images allowed for indoor area'),
+    images: Yup.array()
+      .min(1, 'At least one image is required for the indoor area')
+      .max(4, 'Maximum 4 images allowed for indoor area')
+      .nullable(),
     description: Yup.string().required('Indoor area description is required'),
   }),
   stage: Yup.object().shape({
-    images: Yup.array().max(4, 'Maximum 4 images allowed for stage area'),
+    images: Yup.array()
+      .min(1, 'At least one image is required for the stage area')
+      .max(4, 'Maximum 4 images allowed for stage area')
+      .nullable(),
     description: Yup.string().required('Stage area description is required'),
   }),
   dining: Yup.object().shape({
-    images: Yup.array().max(4, 'Maximum 4 images allowed for dining area'),
+    images: Yup.array()
+      .min(1, 'At least one image is required for the dining area')
+      .max(4, 'Maximum 4 images allowed for dining area')
+      .nullable(),
     description: Yup.string().required('Dining area description is required'),
   }),
 });
@@ -65,7 +78,7 @@ const initialValues: VenuePost = {
 const OrgPostForm: React.FC = () => {
   const handleSignOut = useHandleSignOut();
   const navigate = useNavigate();
-  
+
   const [imageURLs, setImageURLs] = useState<{ [key: string]: string[] }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -78,16 +91,18 @@ const OrgPostForm: React.FC = () => {
 
   const handleImageUpload = (files: File[], section: keyof VenuePost, arrayHelpers: any) => {
     console.log(`Uploading files for section: ${section}`);
-    
-    // Log file details for debugging
-    files.forEach(file => {
-      console.log(`File name: ${file.name}, File size: ${file.size}, File type: ${file.type}`);
-    });
 
-    files.forEach(file => {
-      arrayHelpers.push(file); // Push files one by one
+    const maxFileSize = 5 * 1024 * 1024; // 5 MB example
+    const validFiles = files.filter(file => file.size <= maxFileSize);
+    const invalidFiles = files.filter(file => file.size > maxFileSize);
+
+    if (invalidFiles.length) {
+      toast.error('Some files exceed the maximum size allowed (5 MB).');
+    }
+
+    validFiles.forEach(file => {
+      arrayHelpers.push(file);
       const url = URL.createObjectURL(file);
-      console.log(`Created object URL: ${url}`);
       setImageURLs(prev => ({
         ...prev,
         [section]: [...(prev[section] || []), url]
@@ -95,67 +110,99 @@ const OrgPostForm: React.FC = () => {
     });
   };
 
+  const getPresignedUrl = async (fileName: string, fileType: string, operation: 'upload' | 'download', expiresIn: number = 3600) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/organizer/presigned-url`, {
+        params: {
+          fileName: encodeURIComponent(fileName),
+          fileType: encodeURIComponent(fileType),
+          operation,
+          expiresIn
+        }
+      });
+      return response.data.url;
+    } catch (error) {
+      console.error('Error getting presigned URL:', error);
+      throw new Error('Could not get presigned URL');
+    }
+  };
+
+  const uploadFileToS3 = async (file: File, url: string) => {
+    try {
+      await axios.put(url, file, {
+        headers: {
+          'Content-Type': file.type,
+        },
+      });
+    } catch (error) {
+      console.error('Error uploading file to S3:', error);
+      throw new Error('Could not upload file');
+    }
+  };
+
   const handleSubmit = async (values: VenuePost, { setSubmitting }: any) => {
     setIsSubmitting(true);
     console.log('Form submitted:', values);
-
-    const uploadImageToFirebase = async (file: File, section: keyof VenuePost) => {
-      const fileRef = ref(storage, `${section}/${file.name}`);
-      await uploadBytes(fileRef, file);
-      return await getDownloadURL(fileRef);
-    };
-
-    const sections: (keyof VenuePost)[] = ['main', 'parking', 'indoor','stage', 'dining'];
+  
+    const sections: (keyof VenuePost)[] = ['main', 'parking', 'indoor', 'stage', 'dining'];
     const imageUrls: { [key: string]: string[] } = {};
-
-    for (const section of sections) {
-      imageUrls[section] = [];
-      for (const file of values[section].images) {
-        const url = await uploadImageToFirebase(file, section);
-        imageUrls[section].push(url);
-      }
-    }
-
-    const postData = {
-      ...values,
-      main: {
-        ...values.main,
-        images: imageUrls.main,
-      },
-      parking: {
-        ...values.parking,
-        images: imageUrls.parking,
-      },
-      indoor: {
-        ...values.indoor,
-        images: imageUrls.indoor,
-      },
-      stage: {
-        ...values.stage,
-        images: imageUrls.stage,
-      },
-      dining: {
-        ...values.dining,
-        images: imageUrls.dining,
-      },
-    };
-
-    const token = localStorage.getItem('token'); 
-
+  
     try {
+      for (const section of sections) {
+        imageUrls[section] = [];
+        console.log(`Processing section: ${section}`);
+        console.log(`Files in section:`, values[section].images);
+        
+        for (const file of values[section].images) {
+          if (file instanceof File) {
+            console.log(`Processing file: ${file.name}, type: ${file.type}`);
+            const presignedUrl = await getPresignedUrl(file.name, file.type, 'upload');
+            await uploadFileToS3(file, presignedUrl);
+            imageUrls[section].push(presignedUrl.split('?')[0]);
+          } else {
+            console.error('Invalid file object:', file);
+          }
+        }
+      }
+  
+      const postData = {
+        ...values,
+        main: {
+          ...values.main,
+          images: imageUrls.main,
+        },
+        parking: {
+          ...values.parking,
+          images: imageUrls.parking,
+        },
+        indoor: {
+          ...values.indoor,
+          images: imageUrls.indoor,
+        },
+        stage: {
+          ...values.stage,
+          images: imageUrls.stage,
+        },
+        dining: {
+          ...values.dining,
+          images: imageUrls.dining,
+        },
+      };
+  
+      const token = localStorage.getItem('token'); 
+  
       const response = await axios.post(`${API_BASE_URL}/organizer/create-post`, postData, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
       });
-
+  
       toast.success('Post created successfully!', { position: "top-center" });
-      setSubmitting(false);
-      setIsSubmitting(false);
       navigate('/organizer/posts');
     } catch (error: any) {
       console.error('Error creating post:', error);
       toast.error('Failed to create post. Please try again.', { position: "top-center" });
+    } finally {
       setSubmitting(false);
       setIsSubmitting(false);
     }
@@ -192,40 +239,45 @@ const OrgPostForm: React.FC = () => {
                                 onUpload={(files) => {
                                   handleImageUpload(files, sectionKey, arrayHelpers);
                                 }}
-                                maxImages={sectionKey ==='main'? 1 : 4}
+                                maxImages={sectionKey === 'main' ? 1 : 4}
+                                fieldName={`${sectionKey}.images`}
+                                setFieldValue={setFieldValue}
                               />
                               <ErrorMessage name={`${sectionKey}.images`} component="div" className="text-red-500" />
                               <div className="flex flex-wrap gap-4 mt-4">
-                                {(imageURLs[sectionKey] || []).length? (
+                                {(imageURLs[sectionKey] || []).length ? (
                                   imageURLs[sectionKey].map((url, index) => (
-                                    <div key={index} className="w-24 h-24 overflow-hidden border border-gray-300 rounded">
-                                      <img src={url} alt={`Uploaded ${index + 1}`} className="w-full h-full object-cover" />
+                                    <div key={index} className="w-32 h-32 relative">
+                                      <img src={url} alt={`Preview ${sectionKey}-${index}`} className="object-cover w-full h-full" />
                                     </div>
                                   ))
                                 ) : (
-                                  <p>No images available</p>
+                                  <p>No images uploaded</p>
                                 )}
                               </div>
                             </div>
                           )}
                         />
-                        <Field
-                          as="textarea"
-                          name={`${sectionKey}.description`}
-                          placeholder={`${sectionKey} area description`}
-                          className="w-full p-2 border rounded"
-                          rows={4}
-                        />
-                        <ErrorMessage name={`${sectionKey}.description`} component="div" className="text-red-500" />
+                        <div className="mb-4">
+                          <label htmlFor={`${sectionKey}.description`} className="block text-gray-700">Description</label>
+                          <Field
+                            as="textarea"
+                            name={`${sectionKey}.description`}
+                            id={`${sectionKey}.description`}
+                            rows={4}
+                            className="w-full p-2 border border-gray-300 rounded"
+                          />
+                          <ErrorMessage name={`${sectionKey}.description`} component="div" className="text-red-500" />
+                        </div>
                       </div>
                     );
                   })}
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-blue-300"
+                    className="bg-blue-500 text-white px-4 py-2 rounded"
                   >
-                    {isSubmitting ? 'Submitting...' : 'Submit'}
+                    Submit
                   </button>
                 </Form>
               )}

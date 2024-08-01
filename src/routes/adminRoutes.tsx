@@ -6,6 +6,7 @@ import UserManagement from "../pages/admin/UserManagement";
 import OrganizerManagement from "../pages/admin/OrganizerManagement";
 import PrivateRoute from "../components/admin/PrivateRoute";
 import PublicRouteAdm from "../components/admin/PublicRoute";
+import Notifications from "../pages/admin/Notification";
 
 const AdminRouters: React.FC = () =>{
     return(
@@ -17,6 +18,7 @@ const AdminRouters: React.FC = () =>{
             <Route path="/dashboard/*" element={<AdminDashboard />}/>
             <Route path="/user-management" element={<UserManagement />}/>
             <Route path="/organizer-management" element={<OrganizerManagement />}/>
+            <Route path="/notifications" element={< Notifications/>}/>
             </Route>
         </Routes>
     )
