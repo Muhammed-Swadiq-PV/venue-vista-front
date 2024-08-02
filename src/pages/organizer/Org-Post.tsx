@@ -11,6 +11,7 @@ import ErrorBoundary from '../../components/ErrorBoundary';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import Spinner from '../../components/Spinner';
+import Cookies from 'js-cookie';
 
 // Define the type for form values
 interface VenueSection {
@@ -92,7 +93,7 @@ const OrgPostForm: React.FC = () => {
   const handleImageUpload = (files: File[], section: keyof VenuePost, arrayHelpers: any) => {
     console.log(`Uploading files for section: ${section}`);
 
-    const maxFileSize = 5 * 1024 * 1024; // 5 MB example
+    const maxFileSize = 5 * 1024 * 1024; // 5 MB maximum
     const validFiles = files.filter(file => file.size <= maxFileSize);
     const invalidFiles = files.filter(file => file.size > maxFileSize);
 
@@ -189,11 +190,12 @@ const OrgPostForm: React.FC = () => {
         },
       };
   
-      const token = localStorage.getItem('token'); 
+      // const token = localStorage.getItem('token');
+      const organizerToken = Cookies.get('OrganizerAccessToken'); 
   
       const response = await axios.post(`${API_BASE_URL}/organizer/create-post`, postData, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${organizerToken}`,
         },
       });
   

@@ -7,6 +7,7 @@ import { API_BASE_URL } from '../../apiConfig';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setAdminDetails } from '../../redux/slices/adminSlice';
+import Cookies from 'js-cookie';
 
 // Define the validation function
 const validate = (values: { email: string; password: string }) => {
@@ -34,11 +35,15 @@ const Signin: React.FC = () => {
       const response = await axios.post(`${API_BASE_URL}/admin/signin`, values);
       console.log('Form submitted successfully:', response.data);
 
-      const { token, email } = response.data;
-      localStorage.setItem('adminToken', token);
+      // const { token, email } = response.data;
+      // localStorage.setItem('adminToken', token);
+
+      const { accessToken, refreshToken } = response.data;
+      Cookies.set('adminAccessToken', accessToken, { expires: 7, path: '/admin' });
+      Cookies.set('adminRefreshToken', refreshToken, { expires: 7, path: '/admin' });
 
       // Dispatch action to store admin details
-      dispatch(setAdminDetails({ email, token }));
+      // dispatch(setAdminDetails({ email, accessToken }));
 
       toast.success('Sign-in successful!');
       setTimeout(() => {

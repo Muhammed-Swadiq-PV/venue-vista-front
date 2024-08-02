@@ -7,6 +7,7 @@ import SignupSchema from '../../components/auth/validations/SignupSchema';
 import { useNavigate } from 'react-router-dom';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from "jwt-decode";
+import Cookies from 'js-cookie';
 
 interface DecodedToken {
   email?: string; 
@@ -30,7 +31,6 @@ const Signup: React.FC = () => {
       
       // Extract email and name from the decoded token
       const { email, name } = decodedToken;
-      // console.log(email, name ,'email and password from jwt token')
       
       if (!email || !name) {
         throw new Error('Email or name not found in token');
@@ -41,8 +41,10 @@ const Signup: React.FC = () => {
         name,
       });
 
-      const { token } = res.data;
-      localStorage.setItem('userToken', token);
+
+      const { accessToken, refreshToken } = res.data;
+      Cookies.set('userAccessToken', accessToken, { expires: 7, path: '/user' });
+      Cookies.set('userRefreshToken', refreshToken, { expires: 7, path: '/user' });
       
       toast.success('Signed up successfully with Google!');
       navigate('/user/home');

@@ -9,11 +9,13 @@ import PrivateRoute from "../components/organizer/PrivateRoute";
 import Home from "../pages/organizer/Home";
 import PublicRouteOrg from "../components/organizer/PublicRoutes";
 import OrgPostForm from "../pages/organizer/Org-Post";
+import ErrorBoundary from "../components/ErrorBoundary";
 
 
 
 const OrganizerRoutes: React.FC = () =>{
     return(
+        <ErrorBoundary>
         <Routes>
             <Route element={<PublicRouteOrg/>}>
              <Route path="/signin" element={<Signin/>} />
@@ -27,6 +29,7 @@ const OrganizerRoutes: React.FC = () =>{
             <Route path='/post' element={< OrgPostForm />}/>
             </Route>
         </Routes>
+        </ErrorBoundary>
     )
 }
 

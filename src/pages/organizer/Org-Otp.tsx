@@ -6,6 +6,7 @@ import { API_BASE_URL } from '../../apiConfig';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
+import Cookies from 'js-cookie';
 import OtpSchema from '../../components/auth/validations/OtpSchema';
 
 const OtpPage: React.FC = () => {
@@ -27,9 +28,10 @@ const OtpPage: React.FC = () => {
         try {
             const response = await axios.post(`${API_BASE_URL}/organizer/verify`, { ...values, email: organizerEmail });
 
-            const {token} = response.data;
-            localStorage.setItem('token', token);
-            
+            const { accessToken, refreshToken } = response.data;
+            Cookies.set('OrganizerAccessToken', accessToken, { expires: 7, path: '/organizer' });
+            Cookies.set('OrganizerRefreshToken', refreshToken, { expires: 7, path: '/organizer' });
+
             console.log('OTP submitted successfully:', response.data);
             toast.success('OTP verification successful!');
             setTimeout(() => {
@@ -47,8 +49,8 @@ const OtpPage: React.FC = () => {
 
 
     const resendOtp = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        event.preventDefault(); 
-            // console.log(userEmail,'swadiq')
+        event.preventDefault();
+        // console.log(userEmail,'swadiq')
         try {
             const response = await axios.post(`${API_BASE_URL}/organizer/resend-otp`, { email: organizerEmail });
             toast.success('OTP resent successfully!');

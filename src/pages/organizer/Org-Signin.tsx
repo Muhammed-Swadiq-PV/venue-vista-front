@@ -7,6 +7,8 @@ import SigninSchema from '../../components/auth/validations/SigninSchema';
 import { useNavigate } from 'react-router-dom';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from "jwt-decode";
+import Cookies from 'js-cookie';
+import { ref } from 'firebase/storage';
 
 interface DecodedToken {
   email?: string;
@@ -29,7 +31,6 @@ const Signin: React.FC = () => {
       
       // Extract email and name from the decoded token
       const { email } = decodedToken;
-      console.log(email, 'email and password from jwt token');
       
       if (!email) {
         throw new Error('Email not signed with google');
@@ -37,9 +38,9 @@ const Signin: React.FC = () => {
 
       const res = await axios.post(`${API_BASE_URL}/organizer/signin-google`,{ email});
 
-      const { token } = res.data;
-      // Store the JWT token in localStorage
-      localStorage.setItem('token', token);
+      const { accessToken , refreshToken } = res.data;
+      Cookies.set('OrganizerAccessToken' , accessToken, { expires: 7, path: '/organizer' });
+      Cookies.set('OrganizerRefreshToken' , refreshToken, { expires: 7, path: '/organizer' });
       
       toast.success('Signed in successfully with Google!');
       navigate('/organizer/home');
@@ -57,9 +58,12 @@ const Signin: React.FC = () => {
     try {
       const response = await axios.post(`${API_BASE_URL}/organizer/signin`, values);
 
-      const { token } = response.data;
-      // Store the JWT token in localStorage
-      localStorage.setItem('token', token);
+      const { accessToken, refreshToken } = response.data;
+
+      // storing token in cookies
+
+      Cookies.set('OrganizerAccessToken', accessToken, { expires: 7, path: '/organizer' });
+      Cookies.set('OrganizerRefreshToken', refreshToken, { expires:7, path:'/organizer' });
 
       console.log('Form submitted successfully:', response.data);
       toast.success('Sign-in successful!');

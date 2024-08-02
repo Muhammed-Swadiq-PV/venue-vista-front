@@ -7,6 +7,7 @@ import SignupSchema from '../../components/auth/validations/SignupSchema';
 import { useNavigate } from 'react-router-dom';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from "jwt-decode";
+import Cookies from 'js-cookie';
 
 interface DecodedToken {
   email?: string; 
@@ -22,15 +23,12 @@ const Signup: React.FC = () => {
       if (!response.credential) {
         throw new Error('Google OAuth token not received');
       }
-
-      // console.log('Google Credential:', response.credential);
       
       // Decode the JWT token received from Google
       const decodedToken: DecodedToken = jwtDecode(response.credential);
       
       // Extract email and name from the decoded token
       const { email, name } = decodedToken;
-      // console.log(email, name ,'email and password from jwt token')
       
       if (!email || !name) {
         throw new Error('Email or name not found in token');
@@ -41,15 +39,14 @@ const Signup: React.FC = () => {
         name,
       });
 
-      const { token } = res.data;
+      const { accessToken , refreshToken } = res.data;
 
-      if(!token){
+      if(!accessToken){
         throw new Error('Token not received from server');
       }
 
-      // Store the JWT token in localStorage
-      localStorage.setItem('token', token);
-      
+      Cookies.set('OrganizerAccessToken' , accessToken, { expires: 7, path: '/organizer' });
+      Cookies.set('OrganizerRefreshToken' , refreshToken, { expires: 7, path: '/organizer' });
       toast.success('Signed up successfully with Google!');
       
       navigate('/organizer/signin');
