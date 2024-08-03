@@ -1,10 +1,8 @@
+// axiosInterceptor.ts
 import axios from 'axios';
-import { toast } from 'react-toastify';
 import { API_BASE_URL } from '../apiConfig';
 import Cookies from 'js-cookie';
 
-
-// Create an Axios instance
 const axiosInstance = axios.create({
   baseURL: `${API_BASE_URL}`,
   headers: {
@@ -12,59 +10,29 @@ const axiosInstance = axios.create({
   },
 });
 
-// Request interceptor for adding the token
 axiosInstance.interceptors.request.use(
   (config) => {
-    const adminToken =  Cookies.get('adminAccessToken');
-    const userToken  = Cookies.get('userAccessToken');
+    const adminToken = Cookies.get('adminAccessToken');
+    const userToken = Cookies.get('userAccessToken');
     const organizerToken = Cookies.get('OrganizerAccessToken');
 
-    let token = '';
+    let token = adminToken || userToken || organizerToken;
+
+    let role = 'user';
+
     if (adminToken) {
-      token = adminToken;
-    }else if (userToken) {
-      token = userToken;
+      role = 'admin';
     } else if (organizerToken) {
-      token = organizerToken;
+      role = 'organizer';
     }
-    
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      config.headers['X-Role'] = role;
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Response interceptor for handling errors
-axiosInstance.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
-    if (error.response) {
-      // Handle specific status codes
-      switch (error.response.status) {
-        case 401:
-          toast.error('Unauthorized. Please log in again.');
-          // Optionally redirect to login page
-          break;
-        case 403:
-          toast.error('Forbidden. You do not have permission to access this resource.');
-          break;
-        case 500:
-          toast.error('Server error. Please try again later.');
-          break;
-        default:
-          toast.error(error.response.data.message || 'An error occurred. Please try again.');
-      }
-    } else {
-      toast.error('Network error. Please check your connection.');
-    }
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 export default axiosInstance;

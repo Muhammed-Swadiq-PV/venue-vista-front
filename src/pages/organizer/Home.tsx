@@ -1,22 +1,21 @@
 import React, { Suspense } from 'react';
 import Header from '../../components/organizer/Header';
 import Footer from '../../components/organizer/Footer';
-import { useHandleSignOut } from '../../components/organizer/SignOut';
+
 import ErrorBoundary from '../../components/ErrorBoundary';
 import { useNavigate } from 'react-router-dom';
 import ImageOne from '../../assets/organizer-assets/warm-welcoming-atmosphere-as-guests-arrive-party-venue.jpg';
 import ImageTwo from '../../assets/organizer-assets/13134.jpg';
+import useAuthRedirect from '../../axios/useAuthRedirect';
 
 const LazyImage: React.FC<{ src: string; alt: string }> = ({ src, alt }) => (
   <img src={src} alt={alt} loading="lazy" className="object-cover h-full w-full rounded-lg" />
 );
 
 const Home: React.FC = () => {
-  const handleSignOut = useHandleSignOut();
+useAuthRedirect();
 
   const navigate = useNavigate();
-
-  
 
   const handleButtonClick = () => {
     navigate('/organizer/post');
@@ -24,7 +23,7 @@ const Home: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header onSignOut={handleSignOut} />
+      <Header />
       <main className="flex-grow p-4 sm:p-6 lg:p-8">
         <div className="flex flex-col gap-8">
           {/* First row */}

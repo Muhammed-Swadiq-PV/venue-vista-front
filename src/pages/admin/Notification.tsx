@@ -4,6 +4,7 @@ import Header from '../../components/admin/Header';
 import Footer from '../../components/admin/Footer';
 import Modal from 'react-modal';
 import { AiOutlineClose } from 'react-icons/ai';
+import { isPending } from '@reduxjs/toolkit';
 
 interface Organizer {
   _id: string;
@@ -58,16 +59,43 @@ const Notifications: React.FC = () => {
     setSelectedOrganizer(null);
   };
 
-  const handleApprove = () => {
-    // Handle approval logic
-    console.log('Organizer approved');
-    closeModal(); // Close modal after action
+  const handleApprove = async () => {
+    if (selectedOrganizer) {
+      try {
+        await axiosInstance.patch(`/admin/organizer/${selectedOrganizer._id}/approve`, {
+          isProfileVerified: true,
+          isProfileApproved: true
+        });
+        // Refresh the list of organizers
+        const response = await axiosInstance.get('/admin/pending-requests');
+        const filteredOrganizers = response.data.filter((organizer: Organizer) =>
+          organizer.isProfileUpdated && !organizer.isProfileVerified
+        );
+        setOrganizers(filteredOrganizers);
+        closeModal(); // Close modal after action
+      } catch (error) {
+        console.error('Failed to approve organizer', error);
+      }
+    }
   };
 
-  const handleDisapprove = () => {
-    // Handle disapproval logic
-    console.log('Organizer disapproved');
-    closeModal(); // Close modal after action
+  const handleDisapprove = async () => {
+    if(selectedOrganizer) {
+      try {
+        await axiosInstance.patch(`/admin/organizer/${selectedOrganizer._id}/disapprove`, {
+          isProfileVerified: true,
+          isProfileApproved: false
+        });
+        const response = await axiosInstance.get('/admin/pending-requests');
+        const filteredOrganizers = response.data.filter((organizer: Organizer) =>
+        organizer.isProfileUpdated && !organizer.isProfileVerified
+      );
+      setOrganizers(filteredOrganizers);
+      closeModal();
+      } catch (error) {
+        console.error('Failed to approve organizer', error);
+      }
+    }
   };
 
   return (

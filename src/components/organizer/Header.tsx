@@ -1,26 +1,14 @@
   import React, { useState } from 'react';
   import { Link, useNavigate } from 'react-router-dom';
-  import { toast } from 'react-toastify';
+  import { useSignOut } from '../../contexts/OrganizerSignOut';
 
-  interface HeaderProps {
-    onSignOut: () => void;
-  }
 
-  const Header: React.FC<HeaderProps> = ({ onSignOut }) => {
+  const Header: React.FC = () => {
     const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
     const navigate = useNavigate();
+    const signOut = useSignOut();
 
-    const handleSignOut = async () => {
-      try {
-        localStorage.removeItem('token');
-        toast.success('Signed out successfully');
-        onSignOut();
-        navigate('/');
-      } catch (error) {
-        console.error('Error during sign out:', error);
-        toast.error('An error occurred while signing out');
-      }
-    };
+
 
     const toggleProfileDropdown = () => {
       setIsProfileDropdownOpen(!isProfileDropdownOpen);
@@ -58,7 +46,7 @@
                   <Link to="/posts" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Posts</Link>
                   <Link to="/manage-posts" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Manage Posts</Link>
                   <Link to="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</Link>
-                  <button onClick={handleSignOut} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</button>
+                  <button onClick={signOut} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</button>
                 </div>
               )}
             </div>

@@ -7,7 +7,11 @@ import AuthRoutes from '../routes/authRoutes';
 import OrganizerRoutes from '../routes/organizerRoutes';
 import AdminRoutes from '../routes/adminRoutes';
 import { SignOutProvider } from '../contexts/AdminSignOut';
+import { UserSignOutProvider } from '../contexts/UserSignOut';
+import { RedirectProvider } from '../contexts/RedirectContext';
+import RedirectHandler from './RedirectHandler';
 import Modal from 'react-modal';
+import { OrganizerSignOutProvider } from '../contexts/OrganizerSignOut';
 
 
 Modal.setAppElement('#root');
@@ -16,16 +20,27 @@ const App: React.FC = () => {
     return (
         < div className='bg-red-50'>
             <Router>
-                <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/user/*" element={<AuthRoutes />} />
-                    <Route path="/organizer/*" element={<OrganizerRoutes />} />
-                    <Route path="/admin/*" element={
-                        <SignOutProvider>
-                            <AdminRoutes />
-                        </SignOutProvider>
-                    } />
-                </Routes>
+                <RedirectProvider>
+                    <RedirectHandler />
+                    <Routes>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/user/*" element={
+                            <UserSignOutProvider>
+                                <AuthRoutes />
+                            </UserSignOutProvider>
+                        } />
+                        <Route path="/organizer/*" element={
+                            <OrganizerSignOutProvider>
+                                <OrganizerRoutes />
+                            </OrganizerSignOutProvider>
+                        } />
+                        <Route path="/admin/*" element={
+                            <SignOutProvider>
+                                <AdminRoutes />
+                            </SignOutProvider>
+                        } />
+                    </Routes>
+                </RedirectProvider>
             </Router>
         </div>
     );

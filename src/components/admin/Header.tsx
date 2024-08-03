@@ -5,6 +5,7 @@ import { FaHome, FaUser, FaUsers, FaBell, FaSignOutAlt } from 'react-icons/fa';
 import axiosInstance from '../../axios/axiosInterceptor';
 import { useSignOut } from '../../contexts/AdminSignOut';
 
+
 const Header: React.FC = () => {
   const [pendingRequests, setPendingRequests] = useState<number>(0);
   const signOut = useSignOut();
@@ -14,12 +15,20 @@ const Header: React.FC = () => {
       try {
         const response = await axiosInstance.get('/admin/pending-requests');
         setPendingRequests(response.data.length);
+        // console.log(response.data, 'in header')
       } catch (error) {
         console.error('Failed to fetch pending requests', error);
       }
     };
 
+    // Initial fetch
     fetchPendingRequests();
+
+    // Polling every 30 seconds
+    const intervalId = setInterval(fetchPendingRequests, 30000);
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   return (
@@ -31,7 +40,7 @@ const Header: React.FC = () => {
           </a>
         </div>
         <nav className="hidden md:flex items-center space-x-8">
-          <Link to="/admin">
+          <Link to="/admin/dashboard">
             <div className="flex items-center space-x-2">
               <FaHome className="text-xl" />
               <span>Home</span>

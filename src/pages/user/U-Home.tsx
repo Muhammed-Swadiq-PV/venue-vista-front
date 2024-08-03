@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Header from '../../components/auth/Header';
 import Footer from '../../components/auth/Footer';
-import { useHandleSignOut } from '../../components/auth/SignOut';
 import ErrorBoundary from '../../components/ErrorBoundary';
 import { API_BASE_URL } from '../../apiConfig';
 import Spinner from '../../components/Spinner';
-import axiosInstance from '../../axios/axiosInterceptor';
+import { useAxiosInterceptor } from '../../axios/useAxiosInterceptor';
+import useAuthRedirect from '../../axios/useAuthRedirect';
 import defaultImage from '../../assets/organizer-assets/k-hills 1.png';
 import Cookies from 'js-cookie';
 
@@ -56,30 +56,23 @@ const getToken = () => {
 };
 
 const UHome: React.FC = () => {
-  const handleSignOut = useHandleSignOut();
+  useAuthRedirect();
+  const axiosInstance = useAxiosInterceptor();
   const [data, setData] = useState<ResponseData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchLatestPost = useCallback(async () => {
-    const token = getToken();
-
     try {
-      const response = await axiosInstance.get<ResponseData>(`${API_BASE_URL}/users/posts/latest`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      console.log(response?.data?.eventHalls[0].main.images, 'getting complete details');
-
+      const response = await axiosInstance.get<ResponseData>(`${API_BASE_URL}/users/posts/latest`);
       setData(response.data);
-      setLoading(false);
     } catch (err) {
       console.error('Error fetching latest post:', err);
       setError('Failed to load the latest post. Please try again later.');
+    } finally {
       setLoading(false);
     }
-  }, []);
+  }, [axiosInstance]);
 
   useEffect(() => {
     fetchLatestPost();
@@ -87,7 +80,7 @@ const UHome: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header onSignOut={handleSignOut} />
+      <Header />
       <main className="flex-grow p-4 sm:p-6 lg:p-8">
         <ErrorBoundary>
           {loading ? (

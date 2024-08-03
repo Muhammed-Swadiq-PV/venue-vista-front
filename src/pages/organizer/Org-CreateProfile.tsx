@@ -8,6 +8,7 @@ import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
 import { storage } from '../../firebaseConfig';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { useAxiosInterceptor } from '../../axios/useAxiosInterceptor';
 import Cookies from 'js-cookie';
 
 
@@ -59,6 +60,7 @@ const districtsToCities: { [key: string]: string[] } = {
 
 const CreateProfile: React.FC = () => {
     const navigate = useNavigate();
+    const axiosInstance = useAxiosInterceptor();
     const [cities, setCities] = useState<string[]>([]);
 
     const initialValues: FormValues = {
@@ -128,7 +130,7 @@ const CreateProfile: React.FC = () => {
             // const token = localStorage.getItem('token');
             const organizerToken  = Cookies.get('OrganizerAccessToken');
             // console.log(profileData, 'profiledata')
-            const response = await axios.post(`${API_BASE_URL}/organizer/create-profile`, profileData, {
+            const response = await axiosInstance.post(`${API_BASE_URL}/organizer/create-profile`, profileData, {
                 headers: {
                     // 'Content-Type': 'multipart/form-data',
                     'Authorization': `Bearer ${organizerToken}`,

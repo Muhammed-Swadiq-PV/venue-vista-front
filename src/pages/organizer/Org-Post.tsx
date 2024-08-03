@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { Formik, Form, Field, ErrorMessage, FieldArray } from 'formik';
 import * as Yup from 'yup';
-import ImageUploader from '../../components/imageUploader/ImageUploader';
 import axios from 'axios';
+import ImageUploader from '../../components/imageUploader/ImageUploader';
 import { API_BASE_URL } from '../../apiConfig';
 import Header from '../../components/organizer/Header';
 import Footer from '../../components/organizer/Footer';
-import { useHandleSignOut } from '../../components/organizer/SignOut';
 import ErrorBoundary from '../../components/ErrorBoundary';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import Spinner from '../../components/Spinner';
 import Cookies from 'js-cookie';
+import { useAxiosInterceptor } from '../../axios/useAxiosInterceptor';
+import useAuthRedirect from '../../axios/useAuthRedirect';
 
 // Define the type for form values
 interface VenueSection {
@@ -77,8 +78,10 @@ const initialValues: VenuePost = {
 
 // Component
 const OrgPostForm: React.FC = () => {
-  const handleSignOut = useHandleSignOut();
+  useAuthRedirect()
+  // const handleSignOut = useHandleSignOut();
   const navigate = useNavigate();
+  const axiosInstance = useAxiosInterceptor();
 
   const [imageURLs, setImageURLs] = useState<{ [key: string]: string[] }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -113,7 +116,7 @@ const OrgPostForm: React.FC = () => {
 
   const getPresignedUrl = async (fileName: string, fileType: string, operation: 'upload' | 'download', expiresIn: number = 3600) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/organizer/presigned-url`, {
+      const response = await axiosInstance.get(`${API_BASE_URL}/organizer/presigned-url`, {
         params: {
           fileName: encodeURIComponent(fileName),
           fileType: encodeURIComponent(fileType),
@@ -193,7 +196,7 @@ const OrgPostForm: React.FC = () => {
       // const token = localStorage.getItem('token');
       const organizerToken = Cookies.get('OrganizerAccessToken'); 
   
-      const response = await axios.post(`${API_BASE_URL}/organizer/create-post`, postData, {
+      const response = await axiosInstance.post(`${API_BASE_URL}/organizer/create-post`, postData, {
         headers: {
           'Authorization': `Bearer ${organizerToken}`,
         },
@@ -212,7 +215,7 @@ const OrgPostForm: React.FC = () => {
 
   return (
     <div>
-      <Header onSignOut={handleSignOut} />
+      <Header />
       <ErrorBoundary>
         <div className="border border-gray-300 p-4 rounded-lg shadow-md max-w-4xl mx-auto">
           {isSubmitting ? (

@@ -19,7 +19,7 @@ export const SignOutProvider: React.FC<{ children: ReactNode }> = ({ children })
       Cookies.remove('adminAccessToken', { path: '/admin' });
       Cookies.remove('adminRefreshToken', { path: '/admin' });
       toast.success('Signed out successfully');
-      navigate('/');
+      navigate('/admin/signin');
     } catch (error) {
       console.error('Error during sign out:', error);
       toast.error('An error occurred while signing out');
