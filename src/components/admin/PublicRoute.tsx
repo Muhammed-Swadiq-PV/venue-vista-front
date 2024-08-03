@@ -3,7 +3,6 @@ import { Navigate, Outlet } from 'react-router-dom';
 import Cookies from 'js-cookie';
 
 const PublicRouteAdm: React.FC = () => {
-    // const token = localStorage.getItem('adminToken');
     const token = Cookies.get('adminAccessToken');
 
     return token ? <Navigate to="/admin/dashboard" /> : <Outlet />;

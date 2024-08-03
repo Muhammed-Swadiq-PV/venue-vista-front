@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { API_BASE_URL } from '../apiConfig';
+import Cookies from 'js-cookie';
+
 
 // Create an Axios instance
 const axiosInstance = axios.create({
@@ -13,9 +15,9 @@ const axiosInstance = axios.create({
 // Request interceptor for adding the token
 axiosInstance.interceptors.request.use(
   (config) => {
-    const adminToken = localStorage.getItem('adminToken'); 
-    const userToken  = localStorage.getItem('userToken');
-    const organizerToken = localStorage.getItem('token');
+    const adminToken =  Cookies.get('adminAccessToken');
+    const userToken  = Cookies.get('userAccessToken');
+    const organizerToken = Cookies.get('OrganizerAccessToken');
 
     let token = '';
     if (adminToken) {

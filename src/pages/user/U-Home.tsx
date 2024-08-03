@@ -52,8 +52,7 @@ interface ResponseData {
 }
 
 const getToken = () => {
-  // return localStorage.getItem('userToken');
-  Cookies.get('userAccessToken');
+  return Cookies.get('userAccessToken');
 };
 
 const UHome: React.FC = () => {
@@ -99,33 +98,35 @@ const UHome: React.FC = () => {
             <div className="text-red-500 text-center">{error}</div>
           ) : data && data.eventHalls.length > 0 && data.organizers.length > 0 ? (
             <div className="max-w-4xl mx-auto">
-              {data.eventHalls.map((eventHall) => {
+              {data.eventHalls.map((eventHall, hallIndex) => {
                 const organizer = data.organizers.find(org => org._id === eventHall.organizerId);
+                const isEven = hallIndex % 2 === 0;
+
                 return (
-                  <div key={eventHall._id} className="mb-8 lg:flex lg:items-center">
-                    <div className="lg:w-1/2 lg:pr-4">
-                      <h1 className="text-2xl font-bold mb-4">{organizer?.name}</h1>
-                      {eventHall.main.images.length > 0 ? (
-                        <img
-                          src={encodeURI(eventHall.main.images[0])}
-                          alt="Main Venue"
-                          className="w-full h-64 object-cover rounded-lg mb-4"
-                          onError={(e) => {
-                            console.error("Error loading image:", e);
-                            e.currentTarget.src = defaultImage; // Use the correct fallback image
-                          }}
-                        />
-                      ) : (
-                        <div className="w-full h-64 bg-gray-200 flex items-center justify-center rounded-lg mb-4">
-                          No Image Available
+                  <div key={eventHall._id} className="mb-8 bg-white rounded-lg shadow-md overflow-hidden">
+                    <h1 className="text-2xl font-bold mb-4 p-4">{organizer?.name}</h1>
+                    <div className={`flex flex-col md:flex-row ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
+                      <div className="w-full md:w-1/2">
+                        {eventHall.main.images[0] && (
+                          <img
+                            src={encodeURI(eventHall.main.images[0])}
+                            alt={`Main Image for ${organizer?.name}`}
+                            className="w-full h-64 object-cover rounded-lg mb-6 ml-4"
+                            onError={(e) => {
+                              console.error("Error loading image:", e);
+                              e.currentTarget.src = defaultImage;
+                            }}
+                          />
+                        )}
+                      </div>
+                      <div className="w-full md:w-1/2 p-4 flex flex-col justify-center">
+                        <p className="text-gray-700 mb-6 ml-6">{eventHall.main.description}</p>
+                        <div className="text-sm text-gray-500 space-y-2 ml-5">
+                          <p>City: {organizer?.city}</p>
+                          <p>District: {organizer?.district}</p>
+                          <p>Phone Number: {organizer?.phoneNumber}</p>
                         </div>
-                      )}
-                    </div>
-                    <div className="lg:w-1/2 lg:pl-4">
-                      <p className="text-gray-700 mb-2">{eventHall.main.description}</p>
-                      <p className="text-gray-500">City: {organizer?.city}</p>
-                      <p className="text-gray-500">District: {organizer?.district}</p>
-                      <p className="text-gray-500">Phone Number: {organizer?.phoneNumber}</p>
+                      </div>
                     </div>
                   </div>
                 );

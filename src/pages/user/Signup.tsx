@@ -31,6 +31,7 @@ const Signup: React.FC = () => {
       
       // Extract email and name from the decoded token
       const { email, name } = decodedToken;
+      console.log(email,name , 'when google auth');
       
       if (!email || !name) {
         throw new Error('Email or name not found in token');
