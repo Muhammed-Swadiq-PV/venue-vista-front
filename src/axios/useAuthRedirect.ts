@@ -10,8 +10,23 @@ const useAuthRedirect = () => {
     const userToken = Cookies.get('userAccessToken');
     const organizerToken = Cookies.get('OrganizerAccessToken');
 
-    if (!adminToken && !userToken && !organizerToken) {
-      // Redirect to the appropriate sign-in page based on the current path
+    if(adminToken){
+      if(window.location.pathname.startsWith('/admin')){
+        return;
+      }
+      navigate('/admin/dashboard', {replace:true});
+    } else if(organizerToken){
+     if ( window.location.pathname.startsWith('/organizer')){
+      return;
+     }
+     navigate('/organizer/home', {replace: true});
+    } else if(userToken){
+      if(window.location.pathname.startsWith('/user')){
+        return;
+      }
+      navigate('/user/home', {replace: true});
+    } else {
+      
       const currentPath = window.location.pathname;
       const redirectPath = currentPath.includes('/admin')
         ? '/admin/signin'
@@ -25,3 +40,4 @@ const useAuthRedirect = () => {
 };
 
 export default useAuthRedirect;
+

@@ -18,7 +18,7 @@ const Home: React.FC = () => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-gray-100">
+      <header className="fixed top-0 left-2 right-2 z-10 flex items-center justify-between bg-white bg-opacity-60 p-4 rounded-md">
         {/* Logo */}
         <div className="flex items-center">
           <a href="/" className="font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-600 to-teal-900">

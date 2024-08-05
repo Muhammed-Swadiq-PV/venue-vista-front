@@ -8,6 +8,7 @@ import { useAxiosInterceptor } from '../../axios/useAxiosInterceptor';
 import useAuthRedirect from '../../axios/useAuthRedirect';
 import defaultImage from '../../assets/organizer-assets/k-hills 1.png';
 import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom';
 
 interface EventHall {
   _id: string;
@@ -57,6 +58,7 @@ const getToken = () => {
 
 const UHome: React.FC = () => {
   useAuthRedirect();
+  const navigate = useNavigate();
   const axiosInstance = useAxiosInterceptor();
   const [data, setData] = useState<ResponseData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -78,6 +80,10 @@ const UHome: React.FC = () => {
     fetchLatestPost();
   }, [fetchLatestPost]);
 
+  const handleViewDetails = (hallId: string) => {
+    navigate(`/user/event-hall/${hallId}`);
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -96,7 +102,8 @@ const UHome: React.FC = () => {
                 const isEven = hallIndex % 2 === 0;
 
                 return (
-                  <div key={eventHall._id} className="mb-8 bg-white rounded-lg shadow-md overflow-hidden">
+                  <div key={eventHall._id} className="mb-8 bg-white rounded-lg shadow-md overflow-hidden cursor-pointer"
+                  onClick={() => handleViewDetails(eventHall._id)}>
                     <h1 className="text-2xl font-bold mb-4 p-4">{organizer?.name}</h1>
                     <div className={`flex flex-col md:flex-row ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
                       <div className="w-full md:w-1/2">
@@ -104,7 +111,7 @@ const UHome: React.FC = () => {
                           <img
                             src={encodeURI(eventHall.main.images[0])}
                             alt={`Main Image for ${organizer?.name}`}
-                            className="w-full h-64 object-cover rounded-lg mb-6 ml-4"
+                            className="p-2 h-64 object-c rounded-lg mb-6 ml-4"
                             onError={(e) => {
                               console.error("Error loading image:", e);
                               e.currentTarget.src = defaultImage;

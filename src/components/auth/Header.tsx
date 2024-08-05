@@ -13,8 +13,8 @@ const Header: React.FC= () => {
   };
 
   return (
-    <div className="px-2 pt-16">
-      <header className="fixed top-0 left-0 right-0 flex justify-between items-center p-3 shadow-xl bg-white rounded-md">
+    <div className="p-2">
+      <header className="fixed top-0 left-4 right-4 flex justify-between items-center p-3 shadow-xl bg-white bg-opacity-60 backdrop-blur-md rounded-md">
         <div className="flex items-center">
           <a
             href="/"

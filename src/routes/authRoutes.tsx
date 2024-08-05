@@ -9,6 +9,7 @@ import OTP from "../pages/user/Otp";
 import UHome from "../pages/user/U-Home";
 import PrivateRoute from "../components/auth/PrivateRoute";
 import PublicRoute from "../components/auth/PublicRoutes";
+import EventHallDetails from "../pages/user/EventHallDetails";
 
 
 const AuthRoutes: React.FC = () => {
@@ -22,6 +23,7 @@ const AuthRoutes: React.FC = () => {
             </Route>
             <Route element={<PrivateRoute/>}>
             <Route path="/home" element={<UHome />} />
+            <Route path="/event-hall/:id" element={<EventHallDetails/>} />
             </Route>
         </Routes>
     )

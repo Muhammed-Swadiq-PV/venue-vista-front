@@ -16,7 +16,7 @@ const Spinner: React.FC<SpinnerProps> = ({ size = 'md', color = 'currentColor', 
   };
 
   return (
-    <div className="flex flex-col items-center justify-center">
+    <div className="flex flex-col items-center justify-center min-h-screen">
       <svg
         className={`animate-spin ${sizeClasses[size]}`}
         xmlns="http://www.w3.org/2000/svg"

@@ -1,5 +1,5 @@
 // useAxiosInterceptor.ts
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import Cookies from 'js-cookie';
 import { useRedirect } from '../contexts/RedirectContext';
@@ -47,13 +47,13 @@ export const useAxiosInterceptor = () => {
     };
   }, [setRedirectPath]);
 
-  const handleUnauthorized = () => {
+  const handleUnauthorized = useCallback(() => {
     toast.error('Session expired. Redirecting to sign-in.');
     clearTokens();
     redirectToSignIn();
-  };
+  }, []);
 
-  const handleForbidden = (data: ErrorResponseData) => {
+  const handleForbidden = useCallback((data: ErrorResponseData) => {
     if (data.message && data.message.includes('blocked')) {
       toast.error('Your account has been blocked. Redirecting to sign-in.');
       clearTokens(['userAccessToken', 'OrganizerAccessToken']);
@@ -61,19 +61,19 @@ export const useAxiosInterceptor = () => {
     } else {
       toast.error('Forbidden. You do not have permission to access this resource.');
     }
-  };
+  }, []);
 
-  const clearTokens = (tokens = ['adminAccessToken', 'userAccessToken', 'OrganizerAccessToken']) => {
+  const clearTokens = useCallback((tokens = ['adminAccessToken', 'userAccessToken', 'OrganizerAccessToken']) => {
     tokens.forEach(token => Cookies.remove(token, { path: `/${token.split('Access')[0].toLowerCase()}` }));
-  };
+  }, []);
 
-  const redirectToSignIn = () => {
+  const redirectToSignIn = useCallback(() => {
     const currentPath = window.location.pathname;
     let redirectPath = '/user/signin';
     if (currentPath.includes('/admin')) redirectPath = '/admin/signin';
     else if (currentPath.includes('/organizer')) redirectPath = '/organizer/signin';
     setRedirectPath(redirectPath);
-  };
+  }, [setRedirectPath]);
 
   return axiosInstance;
 };

@@ -147,16 +147,16 @@ const OrgPostForm: React.FC = () => {
   const handleSubmit = async (values: VenuePost, { setSubmitting }: any) => {
     setIsSubmitting(true);
     console.log('Form submitted:', values);
-  
+
     const sections: (keyof VenuePost)[] = ['main', 'parking', 'indoor', 'stage', 'dining'];
     const imageUrls: { [key: string]: string[] } = {};
-  
+
     try {
       for (const section of sections) {
         imageUrls[section] = [];
         console.log(`Processing section: ${section}`);
         console.log(`Files in section:`, values[section].images);
-        
+
         for (const file of values[section].images) {
           if (file instanceof File) {
             console.log(`Processing file: ${file.name}, type: ${file.type}`);
@@ -168,7 +168,7 @@ const OrgPostForm: React.FC = () => {
           }
         }
       }
-  
+
       const postData = {
         ...values,
         main: {
@@ -192,16 +192,16 @@ const OrgPostForm: React.FC = () => {
           images: imageUrls.dining,
         },
       };
-  
+
       // const token = localStorage.getItem('token');
-      const organizerToken = Cookies.get('OrganizerAccessToken'); 
-  
+      const organizerToken = Cookies.get('OrganizerAccessToken');
+
       const response = await axiosInstance.post(`${API_BASE_URL}/organizer/create-post`, postData, {
         headers: {
           'Authorization': `Bearer ${organizerToken}`,
         },
       });
-  
+
       toast.success('Post created successfully!', { position: "top-center" });
       navigate('/organizer/posts');
     } catch (error: any) {
@@ -214,10 +214,10 @@ const OrgPostForm: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className='space-y-5'>
       <Header />
       <ErrorBoundary>
-        <div className="border border-gray-300 p-4 rounded-lg shadow-md max-w-4xl mx-auto">
+        <div className="border border-gray-300 bg-white p-4 rounded-lg shadow-md max-w-4xl mx-auto">
           {isSubmitting ? (
             <div className="flex justify-center items-center h-64">
               <Spinner text="Submitting..." />
@@ -227,9 +227,10 @@ const OrgPostForm: React.FC = () => {
               initialValues={initialValues}
               validationSchema={validationSchema}
               onSubmit={handleSubmit}
+
             >
               {({ values, setFieldValue, isSubmitting }) => (
-                <Form className="p-4">
+                <Form className="p-4 ">
                   {Object.entries(values).map(([section, data]) => {
                     const sectionKey = section as keyof VenuePost;
 
@@ -277,13 +278,16 @@ const OrgPostForm: React.FC = () => {
                       </div>
                     );
                   })}
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="bg-blue-500 text-white px-4 py-2 rounded"
-                  >
-                    Submit
-                  </button>
+                  <div className='items-center text-center'>
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="bg-blue-500 text-white px-4 py-2 rounded transition-colors duration-300 ease-in-out hover:bg-green-600 hover:shadow-lg"
+                    >
+                      Submit
+                    </button>
+
+                  </div>
                 </Form>
               )}
             </Formik>
