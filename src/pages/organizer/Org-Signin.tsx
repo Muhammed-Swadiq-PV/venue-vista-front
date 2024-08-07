@@ -8,7 +8,6 @@ import { useNavigate } from 'react-router-dom';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from "jwt-decode";
 import Cookies from 'js-cookie';
-import { ref } from 'firebase/storage';
 
 interface DecodedToken {
   email?: string;
@@ -46,7 +45,11 @@ const Signin: React.FC = () => {
       navigate('/organizer/home');
     } catch (error: any) {
       console.error('Google OAuth error:', error);
-      toast.error('Failed to sign in with Google. Please try again.');
+      if (error.response && error.response.data.error) {
+        toast.error(error.response.data.error);
+      } else {
+        toast.error('Failed to sign in. Please try again.');
+      }
     }
   };
 
@@ -58,12 +61,13 @@ const Signin: React.FC = () => {
     try {
       const response = await axios.post(`${API_BASE_URL}/organizer/signin`, values);
 
-      const { accessToken, refreshToken } = response.data;
+      const { accessToken, refreshToken , organizerId } = response.data;
 
       // storing token in cookies
 
       Cookies.set('OrganizerAccessToken', accessToken, { expires: 7, path: '/organizer' });
       Cookies.set('OrganizerRefreshToken', refreshToken, { expires:7, path:'/organizer' });
+      Cookies.set('OrganizerId', organizerId, { expires: 7, path: '/organizer' });
 
       console.log('Form submitted successfully:', response.data);
       toast.success('Sign-in successful!');

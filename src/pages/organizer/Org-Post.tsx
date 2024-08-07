@@ -214,10 +214,10 @@ const OrgPostForm: React.FC = () => {
   };
 
   return (
-    <div className='space-y-5'>
+    <div className='pt-20'>
       <Header />
       <ErrorBoundary>
-        <div className="border border-gray-300 bg-white p-4 rounded-lg shadow-md max-w-4xl mx-auto">
+        <div className=" border border-gray-300 bg-white p-4 rounded-lg shadow-md max-w-4xl mx-auto ">
           {isSubmitting ? (
             <div className="flex justify-center items-center h-64">
               <Spinner text="Submitting..." />

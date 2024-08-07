@@ -1,12 +1,14 @@
-import React, { Suspense } from 'react';
+import React, { useState, useEffect,  Suspense } from 'react';
 import Header from '../../components/organizer/Header';
 import Footer from '../../components/organizer/Footer';
-
 import ErrorBoundary from '../../components/ErrorBoundary';
 import { useNavigate } from 'react-router-dom';
 import ImageOne from '../../assets/organizer-assets/warm-welcoming-atmosphere-as-guests-arrive-party-venue.jpg';
 import ImageTwo from '../../assets/organizer-assets/13134.jpg';
 import useAuthRedirect from '../../axios/useAuthRedirect';
+import axios from 'axios';
+import Cookies from 'js-cookie';
+import { API_BASE_URL } from '../../apiConfig';
 
 const LazyImage: React.FC<{ src: string; alt: string }> = ({ src, alt }) => (
   <img src={src} alt={alt} loading="lazy" className="object-cover h-full w-full rounded-lg" />
@@ -17,14 +19,46 @@ useAuthRedirect();
 
   const navigate = useNavigate();
 
+  // checking that organizer already added post about venue and navigating based on that
+  
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const [hasPost, setHasPost] = useState(false);
+
+  useEffect(() => {
+    const fetchPostData = async () => {
+      try {
+        const organizerId = Cookies.get('OrganizerId');
+        if (organizerId) {
+          const response = await axios.get(`${API_BASE_URL}/organizer/post/${organizerId}`);
+          // console.log(response.data.hasPost, 'current status of the organizer')
+          setHasPost(response.data.hasPost);
+          setIsDataLoaded(true);
+        }
+      } catch (error) {
+        console.error('Error fetching organizer data', error);
+        setIsDataLoaded(true);
+      }
+    };
+
+    fetchPostData();
+  }, []);
+
   const handleButtonClick = () => {
-    navigate('/organizer/post');
+    if(hasPost){
+      navigate('organizer/view-post')
+    }else{
+      navigate('/organizer/post');
+    }
   };
+
+  if (!isDataLoaded) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="flex-grow p-4 sm:p-6 lg:p-8">
+      <main className="flex-grow p-4 sm:p-6 lg:p-8 mt-8">
         <div className="flex flex-col gap-8">
           {/* First row */}
           <div className="flex flex-col md:flex-row gap-8">
@@ -70,9 +104,9 @@ useAuthRedirect();
                     <li>Showcase high-quality images and virtual tours</li>
                   </ul>
                   <div className='flex justify-center'>
-                  <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700">
+                  {/* <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700">
                     Learn More
-                  </button>
+                  </button> */}
                   </div>
                 </div>
               </ErrorBoundary>

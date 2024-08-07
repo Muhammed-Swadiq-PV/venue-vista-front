@@ -17,6 +17,7 @@ export const OrganizerSignOutProvider: React.FC<{ children: ReactNode }> = ({ ch
           console.log('trying to remove token')
         Cookies.remove('OrganizerAccessToken', { path: '/organizer' });
         Cookies.remove('OrganizerRefreshToken', { path: '/organizer' });
+        Cookies.remove('OrganizerId', { path:'/organizer' });
         toast.success('Signed out successfully');
         navigate('/organizer/signin');
       } catch (error) {

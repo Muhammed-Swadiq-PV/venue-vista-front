@@ -1,5 +1,6 @@
 import React from 'react';
 import axios from 'axios';
+import axiosInstance from '../../axios/axiosInterceptor';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { toast, ToastContainer } from 'react-toastify';
 import { API_BASE_URL } from '../../apiConfig';
@@ -43,7 +44,12 @@ const Signin: React.FC = () => {
       navigate('/user/home');
     } catch (error: any) {
       console.error('Google OAuth error:', error);
-      toast.error('Failed to sign in with Google. Please try again.');
+      
+      if (error.response && error.response.data.error) {
+        toast.error(error.response.data.error);
+      } else {
+        toast.error('Failed to sign in. Please try again.');
+      }
     }
   };
 
@@ -64,7 +70,8 @@ const Signin: React.FC = () => {
         navigate('/user/home');
       }, 1000);
     } catch (error: any) {
-      console.error('Error submitting form:', error);
+      console.error('Error submitting form:', error.data);
+
       if (error.response && error.response.data.error) {
         toast.error(error.response.data.error);
       } else {
