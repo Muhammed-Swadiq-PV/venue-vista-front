@@ -18,14 +18,18 @@ interface EventHall {
     dining: {
         images: string[];
         description: string;
+        seatingCapacity?: number;
     };
     indoor: {
         images: string[];
         description: string;
+        seatingCapacity?: number;
     };
     parking: {
         images: string[];
         description: string;
+        carParkingSpace?: number;
+        bikeParkingSpace?: number;
     };
     stage: {
         images: string[];
@@ -62,7 +66,7 @@ const EventHallDetails: React.FC = () => {
         const fetchDetails = async () => {
             try {
                 const response = await axiosInstance.get<ResponseData>(`${API_BASE_URL}/users/event-hall/${id}`);
-                console.log(response.data, 'response');
+                // console.log(response.data, 'response');
                 setData(response.data.eventHalls[0]);
                 setOrganizer(response.data.organizers[0]);
             } catch (err) {
@@ -88,7 +92,7 @@ const EventHallDetails: React.FC = () => {
         return <div className="text-red-500 text-center">No event hall details found.</div>;
     }
 
-    const renderSection = (title: string, section: { images: string[]; description: string }) => (
+    const renderSection = (title: string, section: { images: string[]; description: string, carParkingSpace?: number, bikeParkingSpace?: number, seatingCapacity?: number, diningCapacity?:number }) => (
         <div className="bg-white p-4 mb-6">
             <h2 className="text-2xl font-semibold mb-4 text-center bg-gradient-to-r from-slate-50 via-slate-300 to-slate-50 rounded-lg">{title}</h2>
             <div className="flex flex-wrap justify-center mb-4 bg-white rounded-lg p-4">
@@ -103,6 +107,10 @@ const EventHallDetails: React.FC = () => {
                 ))}
             </div>
             <p className=' p-5 rounded-md bg-gradient-to-b from-white from-35%  to-slate-200'>{section.description}</p>
+            {section.carParkingSpace!== undefined && <p>Car Parking Space: {section.carParkingSpace}</p>}
+            {section.bikeParkingSpace !== undefined && <p>Bike Parking Space: {section.bikeParkingSpace}</p>}
+            {section.seatingCapacity !== undefined && <p>Seating Capacity: {section.seatingCapacity}</p>}
+            {section.diningCapacity !== undefined && <p>Dining Capacity: {section.diningCapacity}</p>}
         </div>
     );
 

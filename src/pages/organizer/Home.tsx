@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import ImageOne from '../../assets/organizer-assets/warm-welcoming-atmosphere-as-guests-arrive-party-venue.jpg';
 import ImageTwo from '../../assets/organizer-assets/13134.jpg';
 import useAuthRedirect from '../../axios/useAuthRedirect';
+import Spinner from '../../components/Spinner';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { API_BASE_URL } from '../../apiConfig';
@@ -20,7 +21,7 @@ useAuthRedirect();
   const navigate = useNavigate();
 
   // checking that organizer already added post about venue and navigating based on that
-  
+
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [hasPost, setHasPost] = useState(false);
 
@@ -45,14 +46,14 @@ useAuthRedirect();
 
   const handleButtonClick = () => {
     if(hasPost){
-      navigate('organizer/view-post')
+      navigate('/organizer/view-post')
     }else{
       navigate('/organizer/post');
     }
   };
 
   if (!isDataLoaded) {
-    return <div>Loading...</div>;
+    return <Spinner text='Loading data.....'/>;
   }
 
   return (

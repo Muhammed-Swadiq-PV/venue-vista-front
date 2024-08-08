@@ -20,13 +20,27 @@ interface VenueSection {
   description: string;
 }
 
+interface ParkingSection extends VenueSection {
+  carParkingSpace: number;
+  bikeParkingSpace: number;
+}
+
+interface IndoorSection extends VenueSection {
+  seatingCapacity: number;
+}
+
+interface DiningSection extends VenueSection {
+  diningCapacity: number;
+}
+
 interface VenuePost {
   main: VenueSection;
-  parking: VenueSection;
-  indoor: VenueSection;
+  parking: ParkingSection;
+  indoor: IndoorSection;
   stage: VenueSection;
-  dining: VenueSection;
+  dining: DiningSection;
 }
+
 
 // Validation schema
 const validationSchema = Yup.object().shape({
@@ -43,6 +57,8 @@ const validationSchema = Yup.object().shape({
       .max(4, 'Maximum 4 images allowed for parking area')
       .nullable(),
     description: Yup.string().required('Parking area description is required'),
+    carParkingSpace: Yup.number().required('Car parking space is required').min(0, 'car parking must be a number'),
+    bikeParkingSpace: Yup.number().required('Bike parking space is required').min(0, 'bike parking must be a number'),
   }),
   indoor: Yup.object().shape({
     images: Yup.array()
@@ -50,6 +66,7 @@ const validationSchema = Yup.object().shape({
       .max(4, 'Maximum 4 images allowed for indoor area')
       .nullable(),
     description: Yup.string().required('Indoor area description is required'),
+    seatingCapacity: Yup.number().required('Seating capacity in indoor is required').min(0, 'seat capacity must be a number'),
   }),
   stage: Yup.object().shape({
     images: Yup.array()
@@ -64,17 +81,19 @@ const validationSchema = Yup.object().shape({
       .max(4, 'Maximum 4 images allowed for dining area')
       .nullable(),
     description: Yup.string().required('Dining area description is required'),
+    diningCapacity: Yup.number().required('Dining capacity is required').min(0, 'dining capacity must be a number'),
   }),
 });
 
 // Initial values
 const initialValues: VenuePost = {
   main: { images: [], description: '' },
-  parking: { images: [], description: '' },
-  indoor: { images: [], description: '' },
+  parking: { images: [], description: '', carParkingSpace: 0, bikeParkingSpace: 0 },
+  indoor: { images: [], description: '', seatingCapacity: 0 },
   stage: { images: [], description: '' },
-  dining: { images: [], description: '' },
+  dining: { images: [], description: '', diningCapacity: 0 },
 };
+
 
 // Component
 const OrgPostForm: React.FC = () => {
@@ -147,19 +166,15 @@ const OrgPostForm: React.FC = () => {
   const handleSubmit = async (values: VenuePost, { setSubmitting }: any) => {
     setIsSubmitting(true);
     console.log('Form submitted:', values);
-
+  
     const sections: (keyof VenuePost)[] = ['main', 'parking', 'indoor', 'stage', 'dining'];
     const imageUrls: { [key: string]: string[] } = {};
-
+  
     try {
       for (const section of sections) {
         imageUrls[section] = [];
-        console.log(`Processing section: ${section}`);
-        console.log(`Files in section:`, values[section].images);
-
         for (const file of values[section].images) {
           if (file instanceof File) {
-            console.log(`Processing file: ${file.name}, type: ${file.type}`);
             const presignedUrl = await getPresignedUrl(file.name, file.type, 'upload');
             await uploadFileToS3(file, presignedUrl);
             imageUrls[section].push(presignedUrl.split('?')[0]);
@@ -168,7 +183,7 @@ const OrgPostForm: React.FC = () => {
           }
         }
       }
-
+  
       const postData = {
         ...values,
         main: {
@@ -192,18 +207,17 @@ const OrgPostForm: React.FC = () => {
           images: imageUrls.dining,
         },
       };
-
-      // const token = localStorage.getItem('token');
+  
       const organizerToken = Cookies.get('OrganizerAccessToken');
-
+  
       const response = await axiosInstance.post(`${API_BASE_URL}/organizer/create-post`, postData, {
         headers: {
           'Authorization': `Bearer ${organizerToken}`,
         },
       });
-
+  
       toast.success('Post created successfully!', { position: "top-center" });
-      navigate('/organizer/posts');
+      navigate('/organizer/view-post');
     } catch (error: any) {
       console.error('Error creating post:', error);
       toast.error('Failed to create post. Please try again.', { position: "top-center" });
@@ -212,9 +226,10 @@ const OrgPostForm: React.FC = () => {
       setIsSubmitting(false);
     }
   };
+  
 
   return (
-    <div className='pt-20'>
+    <div className='pt-20 '>
       <Header />
       <ErrorBoundary>
         <div className=" border border-gray-300 bg-white p-4 rounded-lg shadow-md max-w-4xl mx-auto ">
@@ -269,12 +284,67 @@ const OrgPostForm: React.FC = () => {
                           <Field
                             as="textarea"
                             name={`${sectionKey}.description`}
+                            placeholder = 'You can add your details about your event hall this data can view by user'
                             id={`${sectionKey}.description`}
                             rows={4}
                             className="w-full p-2 border border-gray-300 rounded"
                           />
                           <ErrorMessage name={`${sectionKey}.description`} component="div" className="text-red-500" />
                         </div>
+                        {sectionKey === 'parking' && (
+                          <>
+                            <div className="flex flex-wrap gap-4 mb-4">
+                              <div className='flex1'>
+                              <label htmlFor={`${sectionKey}.carParkingSpace`} className="block text-gray-700">Car Parking Space</label>
+                              <Field
+                                type="number"
+                                id={`${sectionKey}.carParkingSpace`}
+                                placeholder='add number of the car parking capacity'
+                                name={`${sectionKey}.carParkingSpace`}
+                                className="w-full p-2 border border-gray-300 rounded"
+                              />
+                              <ErrorMessage name={`${sectionKey}.carParkingSpace`} component="div" className="text-red-500" />
+                            </div>
+                            <div className="mb-4">
+                              <label htmlFor={`${sectionKey}.bikeParkingSpace`} className="block text-gray-700">Bike Parking Space</label>
+                              <Field
+                                type="number"
+                                id={`${sectionKey}.bikeParkingSpace`}
+                                placeholder='add number of bike parking capacity'
+                                name={`${sectionKey}.bikeParkingSpace`}
+                                className="w-full p-2 border border-gray-300 rounded"
+                              />
+                              <ErrorMessage name={`${sectionKey}.bikeParkingSpace`} component="div" className="text-red-500" />
+                            </div>
+                            </div>
+                          </>
+                        )}
+                        {sectionKey === 'indoor' && (
+                          <div className=" mb-4">
+                            <label htmlFor={`${sectionKey}.seatingCapacity`} className="block text-gray-700 font-medium mb-1">Seating Capacity</label>
+                            <Field
+                              type="number"
+                              id={`${sectionKey}.seatingCapacity`}
+                              placeholder='add number of the capacity'
+                              name={`${sectionKey}.seatingCapacity`}
+                              className="w-full p-2 border border-gray-300 rounded"
+                            />
+                            <ErrorMessage name={`${sectionKey}.seatingCapacity`} component="div" className="text-red-500" />
+                          </div>
+                        )}
+                        {sectionKey === 'dining' && (
+                          <div className="mb-4">
+                            <label htmlFor={`${sectionKey}.diningCapacity`} className="block text-gray-700">Dining Capacity</label>
+                            <Field
+                              type="number"
+                              id={`${sectionKey}.diningCapacity`}
+                              placeholder='add number of the dining capacity'
+                              name={`${sectionKey}.diningCapacity`}
+                              className="w-full p-2 border border-gray-300 rounded"
+                            />
+                            <ErrorMessage name={`${sectionKey}.diningCapacity`} component="div" className="text-red-500" />
+                          </div>
+                        )}
                       </div>
                     );
                   })}

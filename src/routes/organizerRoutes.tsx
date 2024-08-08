@@ -10,6 +10,7 @@ import Home from "../pages/organizer/Home";
 import PublicRouteOrg from "../components/organizer/PublicRoutes";
 import OrgPostForm from "../pages/organizer/Org-Post";
 import ErrorBoundary from "../components/ErrorBoundary";
+import ViewPost from "../pages/organizer/View-Post";
 
 
 
@@ -27,6 +28,7 @@ const OrganizerRoutes: React.FC = () =>{
             <Route path="/create-profile" element={<CreateProfile />} />
             <Route path="/home" element={<Home />}/>
             <Route path='/post' element={< OrgPostForm />}/>
+            <Route path="/view-post"element={<ViewPost />}/>
             </Route>
         </Routes>
         </ErrorBoundary>
