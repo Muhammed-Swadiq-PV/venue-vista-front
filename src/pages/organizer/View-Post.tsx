@@ -172,7 +172,7 @@ const ViewPost: React.FC = () => {
       };
 
     const renderSection = (title: string, section: { images: string[]; description: string, carParkingSpace?: number, bikeParkingSpace?: number, seatingCapacity?: number, diningCapacity?: number }) => (
-        <div className="bg-white p-4 mb-6">
+        <div className="bg-white p-4 mb-6 space-y-2">
             <h2 className="text-2xl font-semibold mb-4 text-center bg-gradient-to-r from-slate-50 via-slate-300 to-slate-50 rounded-lg">{title}</h2>
             <div className="flex flex-wrap justify-center mb-4 bg-white rounded-lg p-4">
                 {section.images.map((image, index) => (
@@ -203,7 +203,7 @@ const ViewPost: React.FC = () => {
     return (
         <>
             <Header />
-            <div className="flex flex-col min-h-screen px-52 pt-8 sm:px-10 lg:px-20">
+            <div className="flex flex-col min-h-screen sm:px-4 lg:px-20 xl:px-56 pt-8">
                 <main className="flex-grow p-4 sm:p-6 lg:p-8">
                     <ErrorBoundary>
                         <div className="bg-white p-4 mb-5">
@@ -232,7 +232,7 @@ const ViewPost: React.FC = () => {
                                     onClick={() => handleEdit('Main', data.main)}
                                     className="bg-blue-500 text-white px-4 py-1 rounded transition-colors duration-300 ease-in-out hover:bg-green-600 hover:shadow-lg"
                                 >
-                                    Edit Main
+                                    Edit
                                 </button>
                             </div>
                         </div>

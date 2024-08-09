@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from "jwt-decode";
 import Cookies from 'js-cookie';
+import { ref } from 'firebase/storage';
 
 interface DecodedToken {
   email?: string;
@@ -23,28 +24,29 @@ const Signin: React.FC = () => {
       if (!response.credential) {
         throw new Error('Google OAuth token not received');
       }
-      
+
       // Decode the JWT token received from Google
       const decodedToken: DecodedToken = jwtDecode(response.credential);
-      
+
       // Extract email and name from the decoded token
       const { email } = decodedToken;
-      
+
       if (!email) {
         throw new Error('Email not signed with google');
       }
 
-      const res = await axios.post(`${API_BASE_URL}/users/signin-google`,{ email});
+      const res = await axios.post(`${API_BASE_URL}/users/signin-google`, { email });
       //store jwt token
-      const { accessToken, refreshToken } = res.data;
+      const { user, accessToken, refreshToken } = res.data;
       Cookies.set('userAccessToken', accessToken, { expires: 7, path: '/user' });
       Cookies.set('userRefreshToken', refreshToken, { expires: 7, path: '/user' });
-      
+      Cookies.set('userId', user._id, { expires: 7, path: '/user' });
+
       toast.success('Signed in successfully with Google!');
       navigate('/user/home');
     } catch (error: any) {
       console.error('Google OAuth error:', error);
-      
+
       if (error.response && error.response.data.error) {
         toast.error(error.response.data.error);
       } else {
@@ -61,9 +63,11 @@ const Signin: React.FC = () => {
     try {
       const response = await axios.post(`${API_BASE_URL}/users/signin`, values);
       //store jwt token
-      const { accessToken, refreshToken } = response.data;
+      const { user, accessToken, refreshToken } = response.data;
+
       Cookies.set('userAccessToken', accessToken, { expires: 7, path: '/user' });
       Cookies.set('userRefreshToken', refreshToken, { expires: 7, path: '/user' });
+      Cookies.set('userId', user._id, { expires: 7, path: '/user' })
 
       toast.success('Sign-in successful!');
       setTimeout(() => {

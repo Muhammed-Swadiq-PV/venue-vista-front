@@ -87,7 +87,7 @@ const UHome: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="flex-grow p-4 sm:p-6 lg:p-8">
+      <main className="flex-grow p-4 sm:p-6 lg:p-8 mt-8">
         <ErrorBoundary>
           {loading ? (
             <div className="flex justify-center items-center h-64">

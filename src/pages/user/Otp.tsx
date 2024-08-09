@@ -29,10 +29,11 @@ const OtpPage: React.FC = () => {
             const response = await axios.post(`${API_BASE_URL}/users/verify`, { ...values, email: userEmail });
             console.log('OTP submitted successfully:', response.data);
 
-            const { accessToken, refreshToken } = response.data;
+            const { user, accessToken, refreshToken } = response.data;
             Cookies.set('userAccessToken', accessToken, { expires: 7, path: '/user' });
             Cookies.set('userRefreshToken', refreshToken, { expires: 7, path: '/user' });
-            
+            Cookies.set('userId', user._id, { expires: 7, path: '/user' })
+
             toast.success('OTP verification successful!');
             setTimeout(() => {
                 navigate('/user/home');
@@ -49,8 +50,8 @@ const OtpPage: React.FC = () => {
 
 
     const resendOtp = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        event.preventDefault(); 
-            // console.log(userEmail,'swadiq')
+        event.preventDefault();
+        // console.log(userEmail,'swadiq')
         try {
             const response = await axios.post(`${API_BASE_URL}/users/resend-otp`, { email: userEmail });
             toast.success('OTP resent successfully!');

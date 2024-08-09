@@ -165,7 +165,7 @@ const OrgPostForm: React.FC = () => {
 
   const handleSubmit = async (values: VenuePost, { setSubmitting }: any) => {
     setIsSubmitting(true);
-    console.log('Form submitted:', values);
+    // console.log('Form submitted:', values);
   
     const sections: (keyof VenuePost)[] = ['main', 'parking', 'indoor', 'stage', 'dining'];
     const imageUrls: { [key: string]: string[] } = {};
@@ -232,7 +232,7 @@ const OrgPostForm: React.FC = () => {
     <div className='pt-20 '>
       <Header />
       <ErrorBoundary>
-        <div className=" border border-gray-300 bg-white p-4 rounded-lg shadow-md max-w-4xl mx-auto ">
+        <div className=" border border-gray-300 bg-white p-4 rounded-lg shadow-md max-w-2xl lg:max-w-3xl mx-auto ">
           {isSubmitting ? (
             <div className="flex justify-center items-center h-64">
               <Spinner text="Submitting..." />

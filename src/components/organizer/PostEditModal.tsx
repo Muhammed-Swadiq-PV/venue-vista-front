@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
-import axios from 'axios'; 
+import axios from 'axios';
 import Cookies from 'js-cookie';
 import { API_BASE_URL } from '../../apiConfig';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 interface PostEditModalProps {
   isOpen: boolean;
@@ -35,6 +38,7 @@ const PostEditModal: React.FC<PostEditModalProps> = ({
   const [diningCapacity, setDiningCapacity] = useState(sectionData.diningCapacity || 0);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
 
   // This function fetches a presigned URL from the server
   const getPresignedUrl = async (fileName: string, fileType: string, operation: 'upload' | 'download') => {
@@ -100,7 +104,7 @@ const PostEditModal: React.FC<PostEditModalProps> = ({
       fileInput.click();
     }
   };
-  
+
 
   const handleRemoveImage = (index: number) => {
     if (images.length > 1) {
@@ -114,7 +118,7 @@ const PostEditModal: React.FC<PostEditModalProps> = ({
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
-      
+
       if (sectionTitle === 'Main' && files.length > 1) {
         setUploadError(`You can only upload one image for ${sectionTitle}`);
         return;
@@ -144,9 +148,19 @@ const PostEditModal: React.FC<PostEditModalProps> = ({
   };
 
   // Handles saving the updated data
-  const handleSave = () => {
-    onSave({ description, images, carParkingSpace, bikeParkingSpace, seatingCapacity, diningCapacity });
-    onRequestClose();
+  const handleSave = async () => {
+    try {
+      setIsSubmitting(true);
+      await onSave({ description, images, carParkingSpace, bikeParkingSpace, seatingCapacity, diningCapacity });
+      toast.success('Post updated successfully');
+      onRequestClose();
+      window.location.reload();
+    } catch (error) {
+      toast.error('Failed to update post. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+
   };
 
   return (
