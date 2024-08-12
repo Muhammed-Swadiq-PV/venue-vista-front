@@ -107,10 +107,10 @@ const EventHallDetails: React.FC = () => {
                 ))}
             </div>
             <p className=' p-5 rounded-md bg-gradient-to-b from-white from-35%  to-slate-200'>{section.description}</p>
-            {section.carParkingSpace!== undefined && <p>Car Parking Space: {section.carParkingSpace}</p>}
-            {section.bikeParkingSpace !== undefined && <p>Bike Parking Space: {section.bikeParkingSpace}</p>}
-            {section.seatingCapacity !== undefined && <p>Seating Capacity: {section.seatingCapacity}</p>}
-            {section.diningCapacity !== undefined && <p>Dining Capacity: {section.diningCapacity}</p>}
+            {section.carParkingSpace!== undefined && <p className='font-bold'>Car Parking Space: <span className='font-bold'>{section.carParkingSpace}</span></p>}
+            {section.bikeParkingSpace !== undefined && <p className='font-bold'>Bike Parking Space: <span className='font-bold'>{section.bikeParkingSpace}</span> </p>}
+            {section.seatingCapacity !== undefined && <p className='font-bold'>Seating Capacity:<span className='font-bold'>{section.seatingCapacity}</span> </p>}
+            {section.diningCapacity !== undefined && <p className='font-bold'>Dining Capacity:<span className='font-bold'>{section.diningCapacity}</span> </p>}
         </div>
     );
 
@@ -119,7 +119,7 @@ const EventHallDetails: React.FC = () => {
         
         <Header/>
         <div className="flex flex-col min-h-screen px-52">
-            <main className="flex-grow p-4 sm:p-6 lg:p-8">
+            <main className="flex-grow bg-blue-100 mt-12 mb-4 p-4 sm:p-6 lg:p-8">
                 <ErrorBoundary>
                     <div className="bg-white p-4 mb-5">
                         <h2 className="text-4xl font-semibold mb-4 text-center">{organizer.name}</h2>

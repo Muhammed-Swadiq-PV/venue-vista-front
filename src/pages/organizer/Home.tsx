@@ -21,18 +21,27 @@ useAuthRedirect();
   const navigate = useNavigate();
 
   // checking that organizer already added post about venue and navigating based on that
-
+  const [currentPage, setCurrentPage] = useState(1);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [hasPost, setHasPost] = useState(false);
+  const [totalPages, setTotalPages] = useState()
 
   useEffect(() => {
-    const fetchPostData = async () => {
+    const fetchPostData = async (page: number = 1, limit: number = 5) => {
       try {
         const organizerId = Cookies.get('OrganizerId');
         if (organizerId) {
-          const response = await axios.get(`${API_BASE_URL}/organizer/post/${organizerId}`);
+          const response = await axios.get(`${API_BASE_URL}/organizer/post/${organizerId}`,
+            {
+              params:{
+                page,
+                limit,
+              },
+            }
+          );
           // console.log(response.data.hasPost, 'current status of the organizer')
           setHasPost(response.data.hasPost);
+          setTotalPages(response.data.totalPages);
           setIsDataLoaded(true);
         }
       } catch (error) {
@@ -43,6 +52,7 @@ useAuthRedirect();
 
     fetchPostData();
   }, []);
+  
 
   const handleButtonClick = () => {
     if(hasPost){

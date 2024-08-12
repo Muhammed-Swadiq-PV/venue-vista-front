@@ -9,6 +9,9 @@ import useAuthRedirect from '../../axios/useAuthRedirect';
 import defaultImage from '../../assets/organizer-assets/k-hills 1.png';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
+import Pagination from '../../components/Pagination';
+
+const ITEMS_PER_PAGE = 5;
 
 interface EventHall {
   _id: string;
@@ -50,24 +53,46 @@ interface Organizer {
 interface ResponseData {
   eventHalls: EventHall[];
   organizers: Organizer[];
+  totalPages: number;
 }
 
-const getToken = () => {
-  return Cookies.get('userAccessToken');
-};
+interface ApiResponse {
+  details: {
+    eventHalls: EventHall[];
+    organizers: Organizer[];
+  };
+  totalPages: number;
+}
+
+const getToken = () => Cookies.get('userAccessToken');
 
 const UHome: React.FC = () => {
   useAuthRedirect();
+
   const navigate = useNavigate();
   const axiosInstance = useAxiosInterceptor();
   const [data, setData] = useState<ResponseData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const fetchLatestPost = useCallback(async () => {
+  const fetchLatestPost = useCallback(async (page: number) => {
     try {
-      const response = await axiosInstance.get<ResponseData>(`${API_BASE_URL}/users/posts/latest`);
-      setData(response.data);
+      const response = await axiosInstance.get<ApiResponse>(`${API_BASE_URL}/users/posts/latest`, {
+        params: {
+          page,
+          limit: ITEMS_PER_PAGE,
+        },
+      });
+
+      const eventHalls = response.data.details.eventHalls || [];
+      const organizers = response.data.details.organizers || [];
+
+      setData({ 
+        eventHalls, 
+        organizers, 
+        totalPages: response.data.totalPages 
+      });
     } catch (err) {
       console.error('Error fetching latest post:', err);
       setError('Failed to load the latest post. Please try again later.');
@@ -77,12 +102,17 @@ const UHome: React.FC = () => {
   }, [axiosInstance]);
 
   useEffect(() => {
-    fetchLatestPost();
-  }, [fetchLatestPost]);
+    fetchLatestPost(currentPage);
+  }, [fetchLatestPost, currentPage]);
 
   const handleViewDetails = (hallId: string) => {
     navigate(`/user/event-hall/${hallId}`);
   }
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    setLoading(true);
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -95,7 +125,7 @@ const UHome: React.FC = () => {
             </div>
           ) : error ? (
             <div className="text-red-500 text-center">{error}</div>
-          ) : data && data.eventHalls.length > 0 && data.organizers.length > 0 ? (
+          ) : data && data.eventHalls.length > 0 ? (
             <div className="max-w-4xl mx-auto">
               {data.eventHalls.map((eventHall, hallIndex) => {
                 const organizer = data.organizers.find(org => org._id === eventHall.organizerId);
@@ -103,7 +133,7 @@ const UHome: React.FC = () => {
 
                 return (
                   <div key={eventHall._id} className="mb-8 bg-white rounded-lg shadow-md overflow-hidden cursor-pointer"
-                  onClick={() => handleViewDetails(eventHall._id)}>
+                    onClick={() => handleViewDetails(eventHall._id)}>
                     <h1 className="text-2xl font-bold mb-4 p-4">{organizer?.name}</h1>
                     <div className={`flex flex-col md:flex-row ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
                       <div className="w-full md:w-1/2">
@@ -111,7 +141,7 @@ const UHome: React.FC = () => {
                           <img
                             src={encodeURI(eventHall.main.images[0])}
                             alt={`Main Image for ${organizer?.name}`}
-                            className="p-2 h-64 object-c rounded-lg mb-6 ml-4"
+                            className="p-2 h-64 object-cover rounded-lg mb-6 ml-4"
                             onError={(e) => {
                               console.error("Error loading image:", e);
                               e.currentTarget.src = defaultImage;
@@ -131,9 +161,16 @@ const UHome: React.FC = () => {
                   </div>
                 );
               })}
+              <div className="flex justify-center mt-6">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={data.totalPages}
+                onPageChange={handlePageChange}
+              />
+              </div>
             </div>
           ) : (
-            <div className="text-center">No posts available.</div>
+            <div className="text-center">No event halls available.</div>
           )}
         </ErrorBoundary>
       </main>

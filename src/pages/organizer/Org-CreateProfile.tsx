@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { toast, ToastContainer } from 'react-toastify';
 import { API_BASE_URL } from '../../apiConfig';
 import * as Yup from 'yup';
+import Spinner from '../../components/Spinner';
 import { useNavigate } from 'react-router-dom';
 import { storage } from '../../firebaseConfig';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -62,6 +62,7 @@ const CreateProfile: React.FC = () => {
     const navigate = useNavigate();
     const axiosInstance = useAxiosInterceptor();
     const [cities, setCities] = useState<string[]>([]);
+    const [loading, setLoading] = useState(false);
 
     const initialValues: FormValues = {
         eventHallName: '',
@@ -98,6 +99,7 @@ const CreateProfile: React.FC = () => {
 
     const handleSubmit = async (values: FormValues, { setSubmitting }: any) => {
         // const formData = new FormData();
+        setLoading(true);
         let ownerIdCardUrl: string | null = null;
         let eventHallLicenseUrl: string | null = null;
     
@@ -117,7 +119,7 @@ const CreateProfile: React.FC = () => {
             }
 
             const profileData = {
-                eventHallName: values.eventHallName,
+                eventHallName: values.eventHallName,    
                 phoneNumber: values.phoneNumber,
                 district: values.district,
                 city: values.city,
@@ -144,6 +146,8 @@ const CreateProfile: React.FC = () => {
             console.error('Error creating profile:', error);
             toast.error('Failed to create profile. Please try again.', { position: "top-center" });
             setSubmitting(false);
+        }  finally {
+            setLoading(false);
         }
     };
 
@@ -299,7 +303,8 @@ const CreateProfile: React.FC = () => {
                                         className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
                                         disabled={isSubmitting}
                                     >
-                                        {isSubmitting ? 'Submitting...' : 'Submit'}
+                                        {/* {isSubmitting ? 'Submitting...' : 'Submit'} */}
+                                        {loading ? <Spinner /> : 'Create Profile'}
                                     </button>
                                 </Form>
                             )}

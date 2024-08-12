@@ -102,10 +102,6 @@ const ViewPost: React.FC = () => {
 
     const handleSave = async (updatedData: any) => {
         if (currentSection) {
-            // Log the current section and updated data for debugging
-            console.log('Current Section:', currentSection.title.toLowerCase());
-            console.log('Updated Data:', updatedData);
-    
             // Prepare payload with only necessary fields based on the section
             const payload: any = {};
             

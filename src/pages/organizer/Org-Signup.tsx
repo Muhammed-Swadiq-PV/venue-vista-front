@@ -108,7 +108,7 @@ const Signup: React.FC = () => {
                       name="name"
                       id="name"
                       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      placeholder="John Doe"
+                      placeholder="Your company nam"
                     />
                     <ErrorMessage name="name" component="div" className="text-red-500 text-sm" />
                   </div>
@@ -119,7 +119,7 @@ const Signup: React.FC = () => {
                       name="email"
                       id="email"
                       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      placeholder="name@company.com"
+                      placeholder="yourcompanyemail.com"
                     />
                     <ErrorMessage name="email" component="div" className="text-red-500 text-sm" />
                   </div>
