@@ -36,7 +36,7 @@ const OtpPage: React.FC = () => {
 
             toast.success('OTP verification successful!');
             setTimeout(() => {
-                navigate('/user/home');
+                navigate('/user/signin');
             }, 1000);
         } catch (error: any) {
             console.error('Error submitting OTP:', error);

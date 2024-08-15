@@ -46,7 +46,7 @@ const CreateProfile: React.FC = () => {
     const handleSubmit = async (values: ProfileFormValues) => {
         try {
             await axios.post(`${API_BASE_URL}/users/profile/${userId}`, values);
-            navigate('/user/home'); // Redirect to the home page after successful profile creation
+            navigate('/user/home'); 
         } catch (error) {
             console.error('Error creating profile:', error);
         }

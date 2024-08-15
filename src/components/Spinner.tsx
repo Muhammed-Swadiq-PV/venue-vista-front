@@ -4,9 +4,11 @@ interface SpinnerProps {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   color?: string;
   text?: string;
+  height?: string; // Add height prop
+  width?: string;  // Add width prop
 }
 
-const Spinner: React.FC<SpinnerProps> = ({ size = 'md', color = 'currentColor', text }) => {
+const Spinner: React.FC<SpinnerProps> = ({ size = 'md', color = 'currentColor', text, height, width }) => {
   const sizeClasses = {
     xs: 'w-4 h-4',
     sm: 'w-6 h-6',
@@ -16,12 +18,13 @@ const Spinner: React.FC<SpinnerProps> = ({ size = 'md', color = 'currentColor', 
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
+    <div className="flex items-center justify-center">
       <svg
         className={`animate-spin ${sizeClasses[size]}`}
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
+        style={{ width: width || sizeClasses[size].split(' ')[0], height: height || sizeClasses[size].split(' ')[1] }}
       >
         <circle
           className="opacity-25"

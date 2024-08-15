@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import Header from '../../components/auth/Header';
 import Footer from '../../components/auth/Footer';
 import ErrorBoundary from '../../components/ErrorBoundary';
@@ -10,6 +10,10 @@ import defaultImage from '../../assets/organizer-assets/k-hills 1.png';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 import Pagination from '../../components/Pagination';
+
+//Lazy image component for images
+const LazyImage = lazy(() => import('../../components/auth/LazyImage'));
+
 
 const ITEMS_PER_PAGE = 5;
 
@@ -88,10 +92,10 @@ const UHome: React.FC = () => {
       const eventHalls = response.data.details.eventHalls || [];
       const organizers = response.data.details.organizers || [];
 
-      setData({ 
-        eventHalls, 
-        organizers, 
-        totalPages: response.data.totalPages 
+      setData({
+        eventHalls,
+        organizers,
+        totalPages: response.data.totalPages
       });
     } catch (err) {
       console.error('Error fetching latest post:', err);
@@ -137,16 +141,15 @@ const UHome: React.FC = () => {
                     <h1 className="text-2xl font-bold mb-4 p-4">{organizer?.name}</h1>
                     <div className={`flex flex-col md:flex-row ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
                       <div className="w-full md:w-1/2">
-                        {eventHall.main.images[0] && (
-                          <img
-                            src={encodeURI(eventHall.main.images[0])}
-                            alt={`Main Image for ${organizer?.name}`}
-                            className="p-2 h-64 object-cover rounded-lg mb-6 ml-4"
-                            onError={(e) => {
-                              console.error("Error loading image:", e);
-                              e.currentTarget.src = defaultImage;
-                            }}
-                          />
+                      {eventHall.main.images[0] && (
+                          <Suspense fallback={<div className="p-2 h-64 flex items-center justify-center">Loading image...</div>}>
+                            <LazyImage
+                              src={encodeURI(eventHall.main.images[0])}
+                              alt={`Main Image for ${organizer?.name}`}
+                              className="p-2 h-64 object-cover rounded-lg mb-6 ml-4"
+                              fallbackSrc={defaultImage}
+                            />
+                          </Suspense>
                         )}
                       </div>
                       <div className="w-full md:w-1/2 p-4 flex flex-col justify-center">
@@ -162,11 +165,11 @@ const UHome: React.FC = () => {
                 );
               })}
               <div className="flex justify-center mt-6">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={data.totalPages}
-                onPageChange={handlePageChange}
-              />
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={data.totalPages}
+                  onPageChange={handlePageChange}
+                />
               </div>
             </div>
           ) : (
