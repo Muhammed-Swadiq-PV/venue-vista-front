@@ -1,12 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { FaHome, FaUser, FaBell, FaEnvelope, FaBars } from 'react-icons/fa';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { FaHome, FaUser, FaBell, FaEnvelope, FaBars, FaSearch } from 'react-icons/fa';
 import { useSignOut } from '../../contexts/UserSignOut';
 import Cookies from 'js-cookie';
 import axios from 'axios';
+import { debounce } from 'lodash'
 import { API_BASE_URL } from '../../apiConfig';
+import { toast } from 'react-toastify';
+import { useOrganizerContext } from '../../hooks/useNearestOrganizer';
 
 const Header: React.FC = () => {
+  const location = useLocation();
   const userId = Cookies.get('userId');
 
   const signOut = useSignOut();
@@ -14,7 +18,21 @@ const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileComplete, setIsProfileComplete] = useState(false);
   const [profile, setProfile] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [userLocation, setUserLocation] = useState({ latitude: 0, longitude: 0 });
+  const [organizers, setOrganizers] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLocationEnabled, setIsLocationEnabled] = useState(false);
+  // const [detailedOrganizers, setDetailedOrganizers] = useState<any[]>([]);
+
+
+  const { setViewingNearby, setDetailedOrganizers } = useOrganizerContext();
+
+  // const [showLocationPrompt, setShowLocationPrompt] = useState(false);
+
+  const lastFetchedLocation = useRef({ latitude: 0, longitude: 0 });
+  const organizersRef = useRef<any[]>([]);
+
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -33,6 +51,161 @@ const Header: React.FC = () => {
     fetchProfile();
   }, [userId]);
 
+
+
+  const fetchOrganizers = useCallback(async (latitude: number, longitude: number) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/users/organizers?lat=${latitude}&lon=${longitude}`);
+      setOrganizers(response.data);
+      console.log(response, 'organizers near to ')
+      // console.log( typeof(response.data[0]._id), 'type of id')
+      organizersRef.current = response.data;
+      lastFetchedLocation.current = { latitude, longitude };
+    } catch (error) {
+      console.error('Error fetching organizers:', error);
+    }
+  }, []);
+
+  const fetchOrganizerDetailsByIds = async (organizers: any[]) => {
+    try {
+      const organizerIds = organizers.map(organizer => organizer._id);
+      const response = await axios.post(`${API_BASE_URL}/users/organizers/details`, { ids: organizerIds });
+      console.log(response, 'response when click button')
+      const detailedOrganizers = response.data;
+      setDetailedOrganizers(detailedOrganizers);
+      setViewingNearby(true);
+    } catch (error) {
+      console.error('Error fetching organizer details:', error);
+    }
+  }
+
+  const debouncedFetchOrganizers = useCallback(
+    debounce((latitude: number, longitude: number) => {
+      const distance = calculateDistance(
+        latitude,
+        longitude,
+        lastFetchedLocation.current.latitude,
+        lastFetchedLocation.current.longitude
+      );
+      if (distance > 0.1 || organizersRef.current.length === 0) {  // 0.1 km threshold
+        fetchOrganizers(latitude, longitude);
+      }
+    }, 1000),
+    [fetchOrganizers]
+  );
+
+
+  useEffect(() => {
+    if (location.pathname === '/user/home') {
+      const fetchUserLocation = () => {
+        if (navigator.geolocation) {
+          navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+            if (result.state === 'granted') {
+              navigator.geolocation.getCurrentPosition((position) => {
+                const { latitude, longitude } = position.coords;
+                setUserLocation({ latitude, longitude });
+                debouncedFetchOrganizers(latitude, longitude);
+        
+              });
+            } else if (result.state === 'prompt' || result.state === 'denied') {
+              navigator.geolocation.getCurrentPosition(
+                (position) => {
+                  const { latitude, longitude } = position.coords;
+                  setUserLocation({ latitude, longitude });
+                  debouncedFetchOrganizers(latitude, longitude);
+          
+                },
+                (error) => {
+                  console.error('Error getting location:', error);
+        
+                }
+              );
+            } else if (result.state === 'denied') {
+              console.log('Location access denied.');
+    
+            }
+          });
+        } else {
+          console.log('Geolocation is not supported by this browser.');
+
+        }
+      };
+      fetchUserLocation();
+    }
+
+    return () => {
+      debouncedFetchOrganizers.cancel();
+    };
+  }, [location.pathname, debouncedFetchOrganizers]);
+
+  // Helper function to calculate distance between two points
+  function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
+    const R = 6371; // Radius of the earth in km
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c; // Distance in km
+    return d;
+  }
+
+  function deg2rad(deg: number) {
+    return deg * (Math.PI / 180);
+  }
+
+
+  const handleLocationButtonClick = () => {
+    if (isLocationEnabled && organizers.length > 0) {
+      fetchOrganizerDetailsByIds(organizers);
+    } else {
+      // Enable location
+      if (navigator.geolocation) {
+        navigator.permissions.query({ name: 'geolocation' }).then((permissionStatus) => {
+          if (permissionStatus.state === 'granted') {
+            // Permission already granted, get location
+            getCurrentPosition();
+          } else if (permissionStatus.state === 'prompt') {
+            // This will trigger the browser's permission prompt
+            getCurrentPosition();
+          } else if (permissionStatus.state === 'denied') {
+            // Permission has been denied, I am using a toast info for inform user
+            console.log('Location permission is denied. Please enable it in your browser settings you can adjust it in the top left side .');
+            showLocationDeniedToast();
+
+          }
+
+          // Listen for changes to the permission state
+          permissionStatus.onchange = () => {
+            if (permissionStatus.state === 'granted') {
+              getCurrentPosition();
+            }
+          };
+        });
+      } else {
+        console.log('Geolocation is not supported by this browser.');
+        // Handle lack of support (e.g., show a message to the user)
+      }
+    }
+  };
+
+  const getCurrentPosition = () => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setUserLocation({ latitude, longitude });
+        debouncedFetchOrganizers(latitude, longitude);
+        setIsLocationEnabled(true);
+      },
+      (error) => {
+        console.error('Error getting location:', error);
+        // Handle error (e.g., show an error message to the user)
+      },
+      { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
+    );
+  };
+
   const toggleProfileMenu = () => {
     setIsProfileMenuOpen(!isProfileMenuOpen);
   };
@@ -41,12 +214,32 @@ const Header: React.FC = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    // Implement search logic here
+  };
+
   const openProfileModal = () => {
     setIsModalOpen(true);
   };
 
   const closeProfileModal = () => {
     setIsModalOpen(false);
+  };
+
+  const showLocationDeniedToast = () => {
+    toast.info(
+      '⚠️ Location permission is denied. Please enable it in your browser settings. You can do this by clicking the "🔒" or "!" symbol near the URL bar, selecting "Site settings," and allowing location access.',
+      {
+        position: "top-right",
+        autoClose: 7000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      }
+    );
   };
 
   return (
@@ -60,6 +253,31 @@ const Header: React.FC = () => {
             Venue-Vista
           </a>
         </div>
+
+        {/* Search and Location Data (Only on Home Page) */}
+        {location.pathname === '/user/home' && (
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className="px-4 py-2 rounded-md border border-gray-300"
+              />
+              <FaSearch className="absolute top-2 right-3 text-gray-500" />
+
+            </div>
+            <button
+              onClick={handleLocationButtonClick}
+              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md"
+            >
+              Nearby Halls
+            </button>
+
+          </div>
+        )}
+
         <nav className="hidden md:flex items-center space-x-4">
           <Link to="/user/home" className="text-gray-600 hover:text-gray-800">
             <FaHome size={24} />

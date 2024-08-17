@@ -331,7 +331,7 @@ const CreateProfile: React.FC = () => {
                                             disabled={isSubmitting}
                                         >
                                             {loading ? (
-                                                <Spinner size="sm" width="20px" height="20px" /> // Adjust size if needed
+                                                <Spinner size="sm" width="20px" height="20px" />
                                             ) : (
                                                 'Create Profile'
                                             )}

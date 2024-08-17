@@ -10,6 +10,7 @@ import defaultImage from '../../assets/organizer-assets/k-hills 1.png';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 import Pagination from '../../components/Pagination';
+import { useOrganizerContext } from '../../hooks/useNearestOrganizer';
 
 //Lazy image component for images
 const LazyImage = lazy(() => import('../../components/auth/LazyImage'));
@@ -75,10 +76,13 @@ const UHome: React.FC = () => {
 
   const navigate = useNavigate();
   const axiosInstance = useAxiosInterceptor();
+  
   const [data, setData] = useState<ResponseData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+
+  const { detailedOrganizers, viewingNearby } = useOrganizerContext();
 
   const fetchLatestPost = useCallback(async (page: number) => {
     try {
@@ -118,6 +122,8 @@ const UHome: React.FC = () => {
     setLoading(true);
   };
 
+  
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -129,7 +135,45 @@ const UHome: React.FC = () => {
             </div>
           ) : error ? (
             <div className="text-red-500 text-center">{error}</div>
-          ) : data && data.eventHalls.length > 0 ? (
+          ):  viewingNearby ? (
+            // Render nearby halls
+            <div className="max-w-4xl mx-auto">
+              {detailedOrganizers.map((detailedOrganizer, index) => {
+                const eventHall = detailedOrganizer.eventHalls[0];
+                const organizer = detailedOrganizer.organizers[0];
+                const isEven = index % 2 === 0;
+          
+                return (
+                  <div key={eventHall._id} className="mb-8 bg-white rounded-lg shadow-md overflow-hidden cursor-pointer"
+                    onClick={() => handleViewDetails(eventHall._id)}>
+                    <h1 className="text-2xl font-bold mb-4 p-4">{organizer.name}</h1>
+                    <div className={`flex flex-col md:flex-row ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
+                      <div className="w-full md:w-1/2">
+                        {eventHall.main.images[0] && (
+                          <Suspense fallback={<div className="p-2 h-64 flex items-center justify-center">Loading image...</div>}>
+                            <LazyImage
+                              src={encodeURI(eventHall.main.images[0])}
+                              alt={`Main Image for ${organizer.name}`}
+                              className="p-2 h-64 object-cover rounded-lg mb-6 ml-4"
+                              fallbackSrc={defaultImage}
+                            />
+                          </Suspense>
+                        )}
+                      </div>
+                      <div className="w-full md:w-1/2 p-4 flex flex-col justify-center">
+                        <p className="text-gray-700 mb-6 ml-6">{eventHall.main.description}</p>
+                        <div className="text-sm text-gray-500 space-y-2 ml-5">
+                          <p>City: {organizer.city}</p>
+                          <p>District: {organizer.district}</p>
+                          <p>Phone Number: {organizer.phoneNumber}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) :  data && data.eventHalls.length > 0 ? (
             <div className="max-w-4xl mx-auto">
               {data.eventHalls.map((eventHall, hallIndex) => {
                 const organizer = data.organizers.find(org => org._id === eventHall.organizerId);

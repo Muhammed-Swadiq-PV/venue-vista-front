@@ -12,6 +12,8 @@ import { RedirectProvider } from '../contexts/RedirectContext';
 import RedirectHandler from './RedirectHandler';
 import Modal from 'react-modal';
 import { OrganizerSignOutProvider } from '../contexts/OrganizerSignOut';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; 
 
 
 Modal.setAppElement('#root');
@@ -42,6 +44,7 @@ const App: React.FC = () => {
                     </Routes>
                 </RedirectProvider>
             </Router>
+            <ToastContainer />
         </div>
     );
 };

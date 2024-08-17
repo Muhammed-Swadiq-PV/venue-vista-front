@@ -24,23 +24,24 @@ const Signin: React.FC = () => {
       }
 
       console.log('Google Credential:', response.credential);
-      
+
       // Decode the JWT token received from Google
       const decodedToken: DecodedToken = jwtDecode(response.credential);
-      
+
       // Extract email and name from the decoded token
       const { email } = decodedToken;
-      
+
       if (!email) {
         throw new Error('Email not signed with google');
       }
 
-      const res = await axios.post(`${API_BASE_URL}/organizer/signin-google`,{ email});
+      const res = await axios.post(`${API_BASE_URL}/organizer/signin-google`, { email });
 
-      const { accessToken , refreshToken } = res.data;
-      Cookies.set('OrganizerAccessToken' , accessToken, { expires: 7, path: '/organizer' });
-      Cookies.set('OrganizerRefreshToken' , refreshToken, { expires: 7, path: '/organizer' });
-      
+      const { accessToken, refreshToken, organizerId } = res.data;
+      Cookies.set('OrganizerAccessToken', accessToken, { expires: 7, path: '/organizer' });
+      Cookies.set('OrganizerRefreshToken', refreshToken, { expires: 7, path: '/organizer' });
+      Cookies.set('OrganizerId', organizerId, { expires: 7, path: '/organizer' });
+
       toast.success('Signed in successfully with Google!');
       navigate('/organizer/home');
     } catch (error: any) {
@@ -61,12 +62,12 @@ const Signin: React.FC = () => {
     try {
       const response = await axios.post(`${API_BASE_URL}/organizer/signin`, values);
 
-      const { accessToken, refreshToken , organizerId } = response.data;
+      const { accessToken, refreshToken, organizerId } = response.data;
 
       // storing token in cookies
 
       Cookies.set('OrganizerAccessToken', accessToken, { expires: 7, path: '/organizer' });
-      Cookies.set('OrganizerRefreshToken', refreshToken, { expires:7, path:'/organizer' });
+      Cookies.set('OrganizerRefreshToken', refreshToken, { expires: 7, path: '/organizer' });
       Cookies.set('OrganizerId', organizerId, { expires: 7, path: '/organizer' });
 
       console.log('Form submitted successfully:', response.data);

@@ -95,8 +95,8 @@ const ViewPost: React.FC = () => {
         return <div className="text-red-500 text-center">No event hall details found.</div>;
     }
 
-    const handleEdit = (section: string , sectionData: any) => {
-        setCurrentSection({ title: section , data: sectionData });
+    const handleEdit = (section: string, sectionData: any) => {
+        setCurrentSection({ title: section, data: sectionData });
         setIsModalOpen(true);
     };
 
@@ -104,7 +104,7 @@ const ViewPost: React.FC = () => {
         if (currentSection) {
             // Prepare payload with only necessary fields based on the section
             const payload: any = {};
-            
+
             switch (currentSection.title.toLowerCase()) {
                 case 'dining':
                     payload.dining = {
@@ -113,7 +113,7 @@ const ViewPost: React.FC = () => {
                         seatingCapacity: updatedData.diningCapacity,
                     };
                     break;
-    
+
                 case 'indoor':
                     payload.indoor = {
                         images: updatedData.images,
@@ -121,7 +121,7 @@ const ViewPost: React.FC = () => {
                         seatingCapacity: updatedData.seatingCapacity,
                     };
                     break;
-    
+
                 case 'parking':
                     payload.parking = {
                         images: updatedData.images,
@@ -130,22 +130,22 @@ const ViewPost: React.FC = () => {
                         bikeParkingSpace: updatedData.bikeParkingSpace,
                     };
                     break;
-    
+
                 case 'stage':
                     payload.stage = {
                         images: updatedData.images,
                         description: updatedData.description,
                     };
                     break;
-    
+
                 default:
                     console.warn('Unknown section:', currentSection.title);
                     return; // Exit if the section is unknown
             }
-    
+
             // Log the payload that will be sent
             console.log('Payload to be sent:', payload);
-    
+
             // Send the updated data to the backend
             try {
                 const response = await axiosInstance.patch(`${API_BASE_URL}/organizer/update-post/${organizerId}`, {
@@ -157,15 +157,15 @@ const ViewPost: React.FC = () => {
                 // Log any errors that occur
                 console.error('Error updating event hall details:', err);
             }
-    
+
             setIsModalOpen(false);
         }
     };
-    
+
 
     const handleCancel = () => {
         setIsModalOpen(false);
-      };
+    };
 
     const renderSection = (title: string, section: { images: string[]; description: string, carParkingSpace?: number, bikeParkingSpace?: number, seatingCapacity?: number, diningCapacity?: number }) => (
         <div className="bg-white p-4 mb-6 space-y-2">
@@ -181,7 +181,7 @@ const ViewPost: React.FC = () => {
                 ))}
             </div>
             <p className="p-5 rounded-md bg-gradient-to-b from-white from-35% to-slate-200">{section.description}</p>
-            {section.carParkingSpace!== undefined && <p>Car Parking Space: {section.carParkingSpace}</p>}
+            {section.carParkingSpace !== undefined && <p>Car Parking Space: {section.carParkingSpace}</p>}
             {section.bikeParkingSpace !== undefined && <p>Bike Parking Space: {section.bikeParkingSpace}</p>}
             {section.seatingCapacity !== undefined && <p>Seating Capacity: {section.seatingCapacity}</p>}
             {section.diningCapacity !== undefined && <p>Dining Capacity: {section.diningCapacity}</p>}
@@ -238,14 +238,14 @@ const ViewPost: React.FC = () => {
                         {renderSection('Stage', data.stage)}
 
                         {isModalOpen && currentSection && (
-              <PostEditModal
-                isOpen={isModalOpen}
-                onRequestClose={handleCancel}
-                sectionTitle={currentSection.title}
-                sectionData={currentSection.data}
-                onSave={handleSave}
-              />
-            )}
+                            <PostEditModal
+                                isOpen={isModalOpen}
+                                onRequestClose={handleCancel}
+                                sectionTitle={currentSection.title}
+                                sectionData={currentSection.data}
+                                onSave={handleSave}
+                            />
+                        )}
                     </ErrorBoundary>
                 </main>
             </div>

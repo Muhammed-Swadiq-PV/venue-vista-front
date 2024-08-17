@@ -10,8 +10,6 @@ const Header: React.FC = () => {
 
   const organizerId = Cookies.get('OrganizerId');
 
-  // console.log(organizerId, 'organizer id')
-
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileComplete, setIsProfileComplete] = useState(false);
@@ -32,7 +30,7 @@ const Header: React.FC = () => {
       }
     };
     fetchProfile();
-  }, []);
+  }, [organizerId]);
 
   const toggleProfileDropdown = () => {
     setIsProfileDropdownOpen(!isProfileDropdownOpen);
@@ -42,6 +40,14 @@ const Header: React.FC = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+
+  const handleProfileLinkClick = () => {
+    if (isProfileComplete) {
+      navigate('/organizer/view-profile');
+    } else {
+      navigate('/organizer/create-profile');
+    }
+  };
 
 
   return (
@@ -93,7 +99,10 @@ const Header: React.FC = () => {
             <Link to="/organizer/home" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Home</Link>
             <Link to="/organizer/notification" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Notifications</Link>
             <Link to="/organizer/messages" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Messages</Link>
-            <Link to="/organizer/create-profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</Link>
+            {/* <Link to="/organizer/create-profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</Link> */}
+            <button onClick={handleProfileLinkClick} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+              Profile
+            </button>
             <Link to="/posts" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Posts</Link>
             <Link to="/manage-posts" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Manage Posts</Link>
             <Link to="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</Link>
