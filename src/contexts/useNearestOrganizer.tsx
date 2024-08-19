@@ -38,7 +38,7 @@ interface Organizer {
   buildingFloor: string;
 }
 
-// Define the combined type for context data
+// Defining the combined type for context data
 interface DetailedOrganizer {
   eventHalls: EventHall[];
   organizers: Organizer[];

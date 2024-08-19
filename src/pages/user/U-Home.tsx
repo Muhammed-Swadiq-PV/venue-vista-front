@@ -10,7 +10,10 @@ import defaultImage from '../../assets/organizer-assets/k-hills 1.png';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 import Pagination from '../../components/Pagination';
-import { useOrganizerContext } from '../../hooks/useNearestOrganizer';
+import { useOrganizerContext } from '../../contexts/useNearestOrganizer';
+import { useSearchContext } from '../../contexts/SearchContext';
+import SearchEventHalls from '../../components/auth/SearchEventHalls';
+
 
 //Lazy image component for images
 const LazyImage = lazy(() => import('../../components/auth/LazyImage'));
@@ -18,7 +21,7 @@ const LazyImage = lazy(() => import('../../components/auth/LazyImage'));
 
 const ITEMS_PER_PAGE = 5;
 
-interface EventHall {
+export interface EventHall {
   _id: string;
   organizerId: string;
   main: {
@@ -45,7 +48,7 @@ interface EventHall {
   updatedAt: string;
 }
 
-interface Organizer {
+export interface Organizer {
   _id: string;
   name: string;
   email: string;
@@ -55,7 +58,11 @@ interface Organizer {
   buildingFloor: string;
 }
 
-interface ResponseData {
+export interface CombinedEventHallData extends EventHall {
+  organizer: Organizer;
+}
+
+export interface ResponseData {
   eventHalls: EventHall[];
   organizers: Organizer[];
   totalPages: number;
@@ -76,11 +83,14 @@ const UHome: React.FC = () => {
 
   const navigate = useNavigate();
   const axiosInstance = useAxiosInterceptor();
-  
+
   const [data, setData] = useState<ResponseData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  // const [currentPage, setCurrentPage] = useState(1);
+  // const [itemsPerPage] = useState(5);
+
+  const { filteredEventHallData, searchTerm, currentPage, setCurrentPage } = useSearchContext();
 
   const { detailedOrganizers, viewingNearby } = useOrganizerContext();
 
@@ -111,7 +121,7 @@ const UHome: React.FC = () => {
 
   useEffect(() => {
     fetchLatestPost(currentPage);
-  }, [fetchLatestPost, currentPage]);
+  }, [fetchLatestPost, currentPage , searchTerm]);
 
   const handleViewDetails = (hallId: string) => {
     navigate(`/user/event-hall/${hallId}`);
@@ -122,29 +132,34 @@ const UHome: React.FC = () => {
     setLoading(true);
   };
 
-  
+  const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
+  const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
+  const currentItems = detailedOrganizers.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredEventHallData.length / ITEMS_PER_PAGE);
+  // const totalPages = data ? data.totalPages : Math.ceil(detailedOrganizers.length / itemsPerPage);
 
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-grow p-4 sm:p-6 lg:p-8 mt-8">
         <ErrorBoundary>
+         <SearchEventHalls />
           {loading ? (
             <div className="flex justify-center items-center h-64">
               <Spinner text="Loading..." />
             </div>
           ) : error ? (
             <div className="text-red-500 text-center">{error}</div>
-          ):  viewingNearby ? (
+          ) : viewingNearby ? (
             // Render nearby halls
             <div className="max-w-4xl mx-auto">
-              {detailedOrganizers.map((detailedOrganizer, index) => {
+              {currentItems.map((detailedOrganizer, index) => {
                 const eventHall = detailedOrganizer.eventHalls[0];
                 const organizer = detailedOrganizer.organizers[0];
                 const isEven = index % 2 === 0;
-          
+
                 return (
-                  <div key={eventHall._id} className="mb-8 bg-white rounded-lg shadow-md overflow-hidden cursor-pointer"
+                  <div key={eventHall._id} className="mb-8 mt-4 bg-white rounded-lg shadow-md overflow-hidden cursor-pointer"
                     onClick={() => handleViewDetails(eventHall._id)}>
                     <h1 className="text-2xl font-bold mb-4 p-4">{organizer.name}</h1>
                     <div className={`flex flex-col md:flex-row ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
@@ -172,20 +187,27 @@ const UHome: React.FC = () => {
                   </div>
                 );
               })}
+              <div className="flex justify-center mt-6">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
+              </div>
             </div>
-          ) :  data && data.eventHalls.length > 0 ? (
+          ) : data && data.eventHalls.length > 0 ? (
             <div className="max-w-4xl mx-auto">
               {data.eventHalls.map((eventHall, hallIndex) => {
                 const organizer = data.organizers.find(org => org._id === eventHall.organizerId);
                 const isEven = hallIndex % 2 === 0;
 
                 return (
-                  <div key={eventHall._id} className="mb-8 bg-white rounded-lg shadow-md overflow-hidden cursor-pointer"
+                  <div key={eventHall._id} className="mb-8 mt-4 bg-white rounded-lg shadow-md overflow-hidden cursor-pointer"
                     onClick={() => handleViewDetails(eventHall._id)}>
                     <h1 className="text-2xl font-bold mb-4 p-4">{organizer?.name}</h1>
                     <div className={`flex flex-col md:flex-row ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
                       <div className="w-full md:w-1/2">
-                      {eventHall.main.images[0] && (
+                        {eventHall.main.images[0] && (
                           <Suspense fallback={<div className="p-2 h-64 flex items-center justify-center">Loading image...</div>}>
                             <LazyImage
                               src={encodeURI(eventHall.main.images[0])}

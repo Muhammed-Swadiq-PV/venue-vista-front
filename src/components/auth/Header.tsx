@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaHome, FaUser, FaBell, FaEnvelope, FaBars, FaSearch } from 'react-icons/fa';
+import { FaHome, FaUser, FaBell, FaEnvelope, FaBars } from 'react-icons/fa';
 import { useSignOut } from '../../contexts/UserSignOut';
 import Cookies from 'js-cookie';
 import axios from 'axios';
 import { debounce } from 'lodash'
 import { API_BASE_URL } from '../../apiConfig';
 import { toast } from 'react-toastify';
-import { useOrganizerContext } from '../../hooks/useNearestOrganizer';
+import { useOrganizerContext } from '../../contexts/useNearestOrganizer';
 
 const Header: React.FC = () => {
   const location = useLocation();
@@ -18,12 +18,11 @@ const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileComplete, setIsProfileComplete] = useState(false);
   const [profile, setProfile] = useState<any>(null);
-  const [searchTerm, setSearchTerm] = useState('');
   const [userLocation, setUserLocation] = useState({ latitude: 0, longitude: 0 });
   const [organizers, setOrganizers] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLocationEnabled, setIsLocationEnabled] = useState(false);
-  // const [detailedOrganizers, setDetailedOrganizers] = useState<any[]>([]);
+
 
 
   const { setViewingNearby, setDetailedOrganizers } = useOrganizerContext();
@@ -70,7 +69,7 @@ const Header: React.FC = () => {
     try {
       const organizerIds = organizers.map(organizer => organizer._id);
       const response = await axios.post(`${API_BASE_URL}/users/organizers/details`, { ids: organizerIds });
-      console.log(response, 'response when click button')
+      // console.log(response, 'response when click button')
       const detailedOrganizers = response.data;
       setDetailedOrganizers(detailedOrganizers);
       setViewingNearby(true);
@@ -105,7 +104,7 @@ const Header: React.FC = () => {
                 const { latitude, longitude } = position.coords;
                 setUserLocation({ latitude, longitude });
                 debouncedFetchOrganizers(latitude, longitude);
-        
+
               });
             } else if (result.state === 'prompt' || result.state === 'denied') {
               navigator.geolocation.getCurrentPosition(
@@ -113,16 +112,16 @@ const Header: React.FC = () => {
                   const { latitude, longitude } = position.coords;
                   setUserLocation({ latitude, longitude });
                   debouncedFetchOrganizers(latitude, longitude);
-          
+
                 },
                 (error) => {
                   console.error('Error getting location:', error);
-        
+
                 }
               );
             } else if (result.state === 'denied') {
               console.log('Location access denied.');
-    
+
             }
           });
         } else {
@@ -214,10 +213,6 @@ const Header: React.FC = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-    // Implement search logic here
-  };
 
   const openProfileModal = () => {
     setIsModalOpen(true);
@@ -257,20 +252,9 @@ const Header: React.FC = () => {
         {/* Search and Location Data (Only on Home Page) */}
         {location.pathname === '/user/home' && (
           <div className="flex items-center space-x-4">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchTerm}
-                onChange={handleSearchChange}
-                className="px-4 py-2 rounded-md border border-gray-300"
-              />
-              <FaSearch className="absolute top-2 right-3 text-gray-500" />
-
-            </div>
             <button
               onClick={handleLocationButtonClick}
-              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md"
+              className="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-md mx-2 my-2 md:mx-4 md:my-0 w-full md:w-auto"
             >
               Nearby Halls
             </button>
@@ -330,6 +314,15 @@ const Header: React.FC = () => {
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden absolute top-16 left-0 right-0 bg-white shadow-lg rounded-md py-2 z-10">
+            {location.pathname === '/user/home' && (
+              <button
+                onClick={handleLocationButtonClick}
+                className="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-md mx-2 my-2 md:mx-4 md:my-0 w-full md:w-auto"
+              >
+                Nearby Halls
+              </button>
+
+            )}
             <Link to="/user/home" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Home</Link>
             <Link to="/notifications" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Notifications</Link>
             <Link to="/messages" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Messages</Link>
