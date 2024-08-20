@@ -5,8 +5,8 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../../apiConfig';
 import Cookies from 'js-cookie';
-import Header from '../../components/auth/Header';
-import Footer from '../../components/auth/Footer';
+import Header from '../../components/user/Header';
+import Footer from '../../components/user/Footer';
 
 interface ProfileFormValues {
     address: string;

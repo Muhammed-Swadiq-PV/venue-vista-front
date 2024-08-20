@@ -7,7 +7,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import Cookies from 'js-cookie';
-import OtpSchema from '../../components/auth/validations/OtpSchema';
+import OtpSchema from '../../components/user/validations/OtpSchema';
 
 const OtpPage: React.FC = () => {
     const navigate = useNavigate();

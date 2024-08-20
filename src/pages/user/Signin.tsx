@@ -1,15 +1,13 @@
 import React from 'react';
 import axios from 'axios';
-import axiosInstance from '../../axios/axiosInterceptor';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { toast, ToastContainer } from 'react-toastify';
 import { API_BASE_URL } from '../../apiConfig';
-import SigninSchema from '../../components/auth/validations/SigninSchema';
+import SigninSchema from '../../components/user/validations/SigninSchema';
 import { useNavigate } from 'react-router-dom';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from "jwt-decode";
 import Cookies from 'js-cookie';
-import { ref } from 'firebase/storage';
 
 interface DecodedToken {
   email?: string;

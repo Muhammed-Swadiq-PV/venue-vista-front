@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { API_BASE_URL } from '../../apiConfig';
 import Spinner from '../../components/Spinner';
 import ErrorBoundary from '../../components/ErrorBoundary';
 import { useAxiosInterceptor } from '../../axios/useAxiosInterceptor';
 import defaultImage from '../../assets/organizer-assets/k-hills 1.png';
-import Header from '../../components/auth/Header';
-import Footer from '../../components/auth/Footer';
+import Header from '../../components/user/Header';
+import Footer from '../../components/user/Footer';
 
 interface EventHall {
     _id: string;
@@ -61,6 +61,7 @@ const EventHallDetails: React.FC = () => {
     const [organizer, setOrganizer] = useState<Organizer | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchDetails = async () => {
@@ -91,6 +92,10 @@ const EventHallDetails: React.FC = () => {
         return <div className="text-red-500 text-center">No event hall details found.</div>;
     }
 
+    const handleBooking = () => {
+        navigate(`/book-event-hall/${id}`);
+    };
+
     const renderSection = (title: string, section: { images: string[]; description: string, carParkingSpace?: number, bikeParkingSpace?: number, seatingCapacity?: number, diningCapacity?: number }) => (
         <div className="bg-white p-4 mb-6 rounded-lg shadow-md">
             <h2 className="text-2xl font-semibold mb-4 text-center bg-gradient-to-r from-slate-50 via-slate-300 to-slate-50 rounded-lg py-2">{title}</h2>
@@ -119,7 +124,7 @@ const EventHallDetails: React.FC = () => {
         <>
 
             <Header />
-            <div className="flex flex-col min-h-screen px-4 md:px-8 lg:px-16 xl:px-52">
+            <div className="flex flex-col mt-6 min-h-screen px-4 md:px-8 lg:px-16 xl:px-52">
                 <main className="flex-grow bg-blue-100 mt-12 mb-4 p-4 sm:p-6 lg:p-8">
                     <ErrorBoundary>
                         <div className="bg-white p-4 mb-5 rounded-lg shadow-md">
@@ -145,10 +150,11 @@ const EventHallDetails: React.FC = () => {
                             </div>
                         </div>
 
-                        {renderSection('Dining', data.dining)}
-                        {renderSection('Indoor', data.indoor)}
-                        {renderSection('Parking', data.parking)}
-                        {renderSection('Stage', data.stage)}
+                        {renderSection('Experience the Perfect Dining Ambiance', data.dining)}
+                        {renderSection('Discover Exceptional Facilities for Unforgettable Events', data.indoor)}
+                        {renderSection('Convenient & Secure Parking for Your Peace of Mind', data.parking)}
+                        {renderSection('Elevate Your Event with Our Stunning Stage', data.stage)}
+
                     </ErrorBoundary>
                 </main>
             </div>

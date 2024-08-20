@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { FaHome, FaUser, FaBell, FaEnvelope, FaBars } from 'react-icons/fa';
 import { useSignOut } from '../../contexts/UserSignOut';
 import Cookies from 'js-cookie';
@@ -12,6 +12,7 @@ import { useOrganizerContext } from '../../contexts/useNearestOrganizer';
 const Header: React.FC = () => {
   const location = useLocation();
   const userId = Cookies.get('userId');
+  const { id } = useParams<{ id: string }>();
 
   const signOut = useSignOut();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -261,6 +262,18 @@ const Header: React.FC = () => {
 
           </div>
         )}
+
+         {/* Show "Book Event Hall" button if on event hall details page */}
+         {location.pathname.includes('/user/event-hall/') && id && (
+                    <div className="flex items-center space-x-4">
+                        <Link
+                            to={`/user/book-event-hall/date-time/${id}`}
+                            className="px-4 py-2 text-sm bg-blue-500 hover:bg-green-600 text-white rounded-md mx-2 my-2 md:mx-4 md:my-0 w-full md:w-auto"
+                        >
+                            Book Event Hall
+                        </Link>
+                    </div>
+                )}
 
         <nav className="hidden md:flex items-center space-x-4">
           <Link to="/user/home" className="text-gray-600 hover:text-gray-800">

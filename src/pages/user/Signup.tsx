@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { toast, ToastContainer } from 'react-toastify';
 import { API_BASE_URL } from '../../apiConfig';
-import SignupSchema from '../../components/auth/validations/SignupSchema';
+import SignupSchema from '../../components/user/validations/SignupSchema';
 import { useNavigate } from 'react-router-dom';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from "jwt-decode";

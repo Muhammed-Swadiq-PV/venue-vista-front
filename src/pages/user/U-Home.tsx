@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
-import Header from '../../components/auth/Header';
-import Footer from '../../components/auth/Footer';
+import Header from '../../components/user/Header';
+import Footer from '../../components/user/Footer';
 import ErrorBoundary from '../../components/ErrorBoundary';
 import { API_BASE_URL } from '../../apiConfig';
 import Spinner from '../../components/Spinner';
@@ -12,11 +12,11 @@ import { useNavigate } from 'react-router-dom';
 import Pagination from '../../components/Pagination';
 import { useOrganizerContext } from '../../contexts/useNearestOrganizer';
 import { useSearchContext } from '../../contexts/SearchContext';
-import SearchEventHalls from '../../components/auth/SearchEventHalls';
+import SearchEventHalls from '../../components/user/SearchEventHalls';
 
 
 //Lazy image component for images
-const LazyImage = lazy(() => import('../../components/auth/LazyImage'));
+const LazyImage = lazy(() => import('../../components/user/LazyImage'));
 
 
 const ITEMS_PER_PAGE = 5;
@@ -87,8 +87,6 @@ const UHome: React.FC = () => {
   const [data, setData] = useState<ResponseData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // const [currentPage, setCurrentPage] = useState(1);
-  // const [itemsPerPage] = useState(5);
 
   const { filteredEventHallData, searchTerm, currentPage, setCurrentPage } = useSearchContext();
 
@@ -136,7 +134,6 @@ const UHome: React.FC = () => {
   const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
   const currentItems = detailedOrganizers.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredEventHallData.length / ITEMS_PER_PAGE);
-  // const totalPages = data ? data.totalPages : Math.ceil(detailedOrganizers.length / itemsPerPage);
 
   return (
     <div className="flex flex-col min-h-screen">
