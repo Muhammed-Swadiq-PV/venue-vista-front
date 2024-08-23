@@ -7,6 +7,7 @@ import { useAxiosInterceptor } from '../../axios/useAxiosInterceptor';
 import defaultImage from '../../assets/organizer-assets/k-hills 1.png';
 import Header from '../../components/user/Header';
 import Footer from '../../components/user/Footer';
+import useAuthRedirect from '../../axios/useAuthRedirect';
 
 interface EventHall {
     _id: string;
@@ -55,6 +56,8 @@ interface ResponseData {
 }
 
 const EventHallDetails: React.FC = () => {
+    useAuthRedirect();
+
     const { id } = useParams<{ id: string }>();
     const axiosInstance = useAxiosInterceptor();
     const [data, setData] = useState<EventHall | null>(null);

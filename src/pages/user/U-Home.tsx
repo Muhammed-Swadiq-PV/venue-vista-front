@@ -87,10 +87,12 @@ const UHome: React.FC = () => {
   const [data, setData] = useState<ResponseData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1)
 
-  const { filteredEventHallData, searchTerm, currentPage, setCurrentPage } = useSearchContext();
+  // const { filteredEventHallData, searchTerm} = useSearchContext();
 
   const { detailedOrganizers, viewingNearby } = useOrganizerContext();
+  const { combinedData } = useSearchContext();
 
   const fetchLatestPost = useCallback(async (page: number) => {
     try {
@@ -119,7 +121,7 @@ const UHome: React.FC = () => {
 
   useEffect(() => {
     fetchLatestPost(currentPage);
-  }, [fetchLatestPost, currentPage , searchTerm]);
+  }, [fetchLatestPost, currentPage ]);
 
   const handleViewDetails = (hallId: string) => {
     navigate(`/user/event-hall/${hallId}`);
@@ -133,12 +135,19 @@ const UHome: React.FC = () => {
   const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
   const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
   const currentItems = detailedOrganizers.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredEventHallData.length / ITEMS_PER_PAGE);
+  const totalPages = viewingNearby
+  ? Math.ceil(detailedOrganizers.length / ITEMS_PER_PAGE)
+  : Math.ceil(combinedData.length / ITEMS_PER_PAGE);
+
+  console.log(totalPages, 'total pages')
+  console.log(combinedData, 'combined data in home page')
+
+  
 
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="flex-grow p-4 sm:p-6 lg:p-8 mt-8">
+      <main className="flex-grow p-4 sm:p-6 lg:p-8 mt-12">
         <ErrorBoundary>
          <SearchEventHalls />
           {loading ? (
@@ -192,6 +201,51 @@ const UHome: React.FC = () => {
                 />
               </div>
             </div>
+          ):combinedData && combinedData.length> 0 ?  (
+            // Render search results
+            <div className="max-w-4xl mx-auto">
+              {combinedData.map((item, index) => {
+                const eventHall = item[0];
+                const organizer = item[1];
+                const isEven = index % 2 === 0;
+  
+                return (
+                  <div key={eventHall._id} className="mb-8 mt-4 bg-white rounded-lg shadow-md overflow-hidden cursor-pointer"
+                    onClick={() => handleViewDetails(eventHall._id)}>
+                    <h1 className="text-2xl font-bold mb-4 p-4">{organizer.name}</h1>
+                    <div className={`flex flex-col md:flex-row ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
+                      <div className="w-full md:w-1/2">
+                        {eventHall.main.images[0] && (
+                          <Suspense fallback={<div className="p-2 h-64 flex items-center justify-center">Loading image...</div>}>
+                            <LazyImage
+                              src={encodeURI(eventHall.main.images[0])}
+                              alt={`Main Image for ${organizer.name}`}
+                              className="p-2 h-64 object-cover rounded-lg mb-6 ml-4"
+                              fallbackSrc={defaultImage}
+                            />
+                          </Suspense>
+                        )}
+                      </div>
+                      <div className="w-full md:w-1/2 p-4 flex flex-col justify-center">
+                        <p className="text-gray-700 mb-6 ml-6">{eventHall.main.description}</p>
+                        <div className="text-sm text-gray-500 space-y-2 ml-5">
+                          <p>City: {organizer.city}</p>
+                          <p>District: {organizer.district}</p>
+                          <p>Phone Number: {organizer.phoneNumber}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              <div className="flex justify-center mt-6">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={Math.ceil(combinedData.length / ITEMS_PER_PAGE)}
+                  onPageChange={handlePageChange}
+                />
+              </div>
+            </div>
           ) : data && data.eventHalls.length > 0 ? (
             <div className="max-w-4xl mx-auto">
               {data.eventHalls.map((eventHall, hallIndex) => {
@@ -235,7 +289,7 @@ const UHome: React.FC = () => {
                 />
               </div>
             </div>
-          ) : (
+          ) :(
             <div className="text-center">No event halls available.</div>
           )}
         </ErrorBoundary>

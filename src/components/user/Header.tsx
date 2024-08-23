@@ -70,7 +70,7 @@ const Header: React.FC = () => {
     try {
       const organizerIds = organizers.map(organizer => organizer._id);
       const response = await axios.post(`${API_BASE_URL}/users/organizers/details`, { ids: organizerIds });
-      // console.log(response, 'response when click button')
+      console.log(response, 'response when click button')
       const detailedOrganizers = response.data;
       setDetailedOrganizers(detailedOrganizers);
       setViewingNearby(true);
@@ -267,7 +267,7 @@ const Header: React.FC = () => {
          {location.pathname.includes('/user/event-hall/') && id && (
                     <div className="flex items-center space-x-4">
                         <Link
-                            to={`/user/book-event-hall/date-time/${id}`}
+                            to={`/user/book-event-hall/date-time/${id}`} 
                             className="px-4 py-2 text-sm bg-blue-500 hover:bg-green-600 text-white rounded-md mx-2 my-2 md:mx-4 md:my-0 w-full md:w-auto"
                         >
                             Book Event Hall

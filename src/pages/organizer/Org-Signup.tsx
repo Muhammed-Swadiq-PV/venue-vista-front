@@ -41,10 +41,6 @@ const Signup: React.FC = () => {
 
       const { accessToken , refreshToken } = res.data;
 
-      // if(!accessToken){
-      //   throw new Error('Token not received from server');
-      // }
-
       Cookies.set('OrganizerAccessToken' , accessToken, { expires: 7, path: '/organizer' });
       Cookies.set('OrganizerRefreshToken' , refreshToken, { expires: 7, path: '/organizer' });
       toast.success('Signed up successfully with Google!');

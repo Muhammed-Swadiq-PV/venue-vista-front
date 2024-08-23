@@ -21,7 +21,7 @@ useAuthRedirect();
   const navigate = useNavigate();
 
   // checking that organizer already added post about venue and navigating based on that
-  const [currentPage, setCurrentPage] = useState(1);
+  
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [hasPost, setHasPost] = useState(false);
   const [totalPages, setTotalPages] = useState()
