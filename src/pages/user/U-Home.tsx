@@ -139,8 +139,6 @@ const UHome: React.FC = () => {
   ? Math.ceil(detailedOrganizers.length / ITEMS_PER_PAGE)
   : Math.ceil(combinedData.length / ITEMS_PER_PAGE);
 
-  console.log(totalPages, 'total pages')
-  console.log(combinedData, 'combined data in home page')
 
   
 

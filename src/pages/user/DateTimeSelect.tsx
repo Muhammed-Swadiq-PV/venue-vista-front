@@ -22,50 +22,46 @@ interface Event {
   type: 'day' | 'night' | 'full';
 }
 
-const events: Event[] = [
-  // Example events data
-  {
-    title: 'Full Day Booked',
-    start: new Date(2024, 7, 21, 9, 0),
-    end: new Date(2024, 7, 21, 23, 0),
-    color: '#ef4444',
-    type: 'full',
-  },
-  {
-    title: 'Day Booked',
-    start: new Date(2024, 7, 22, 9, 0),
-    end: new Date(2024, 7, 22, 17, 0),
-    color: '#3b82f6',
-    type: 'day',
-  },
-  {
-    title: 'Night Booked',
-    start: new Date(2024, 7, 23, 18, 0),
-    end: new Date(2024, 7, 23, 23, 0),
-    color: '#f59e0b',
-    type: 'night',
-  },
-];
-
 const BookingCalendar: React.FC = () => {
   useAuthRedirect();
 
   const { id } = useParams<{ id: string }>();
   const [eventHallName, setEventHallName] = useState<string>('');
+  const [organizerId , setOrganizerId] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [availability, setAvailability] = useState<string>('');
+  const [availability, setAvailability] = useState<string[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
 
   useEffect(() => {
     const fetchEventHallName = async () => {
       try {
         const response = await axiosInstance.get(`${API_BASE_URL}/users/organizers/${id}`);
-        setEventHallName(response.data);
+        setOrganizerId(response.data.organizerId);
+        setEventHallName(response.data.organizerName);
       } catch (error) {
         console.error('Error fetching event hall name:', error);
       }
     };
+
+    const fetchEvents = async () => {
+      try {
+        const response = await axiosInstance.get(`${API_BASE_URL}/users/events/${organizerId}`);
+        const fetchedEvents = response.data.map((event: any) => ({
+          title: event.title,
+          start: new Date(event.start),
+          end: new Date(event.end),
+          type: event.type,
+          color: event.type === 'full' ? '#ef4444' : event.type === 'day' ? '#3b82f6' : '#f59e0b',
+        }));
+        setEvents(fetchedEvents);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      }
+    };
+
     fetchEventHallName();
+    fetchEvents();
   }, [id]);
 
   const eventStyleGetter = (event: Event) => {
@@ -81,6 +77,13 @@ const BookingCalendar: React.FC = () => {
   };
 
   const customDayPropGetter = (date: Date) => {
+    const today = moment().startOf('day');
+    const isPastDay = moment(date).isBefore(today, 'day');
+
+    if (isPastDay) {
+      return { className: 'bg-gray-200 cursor-not-allowed' };
+    }
+
     const dayEvents = events.filter((event) =>
       moment(date).isSame(event.start, 'day')
     );
@@ -103,12 +106,17 @@ const BookingCalendar: React.FC = () => {
   };
 
   const handleDateClick = (date: Date) => {
+    const today = moment().startOf('day');
+    if (moment(date).isBefore(today, 'day')) {
+      return;
+    }
+
     setSelectedDate(date);
     const dayEvents = events.filter((event) =>
       moment(date).isSame(event.start, 'day')
     );
-    const availabilityText = dayEvents.map(event => event.title).join(', ');
-    setAvailability(availabilityText || 'Available');
+    const availabilityText = dayEvents.map(event => event.title);
+    setAvailability(availabilityText);
     setIsModalOpen(true);
   };
 
@@ -156,13 +164,14 @@ const BookingCalendar: React.FC = () => {
         </div>
       </div>
 
-      {isModalOpen && (
+      {isModalOpen && selectedDate && (
         <BookingModal
           isOpen={isModalOpen}
           onRequestClose={() => setIsModalOpen(false)}
-          selectedDate={selectedDate!}  // using non-null assertion since date will be set
+          selectedDate={selectedDate}
           availability={availability}
           onBook={handleBook}
+          organizerId={organizerId}
         />
       )}
 

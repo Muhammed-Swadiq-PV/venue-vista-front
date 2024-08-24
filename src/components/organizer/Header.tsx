@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSignOut } from '../../contexts/OrganizerSignOut';
-import { HiBell, HiChat, HiUser, HiHome, HiMenu } from 'react-icons/hi';
+import { HiBell, HiChat, HiUser, HiHome, HiMenu, HiChevronDown } from 'react-icons/hi';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { API_BASE_URL } from '../../apiConfig';
@@ -13,6 +13,7 @@ const Header: React.FC = () => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileComplete, setIsProfileComplete] = useState(false);
+  const [isBookingTermsOpen, setIsBookingTermsOpen] = useState(false);
   const navigate = useNavigate();
   const signOut = useSignOut();
 
@@ -38,6 +39,10 @@ const Header: React.FC = () => {
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const toggleBookingTerms = () => {
+    setIsBookingTermsOpen(!isBookingTermsOpen);
   };
 
 
@@ -80,6 +85,18 @@ const Header: React.FC = () => {
                   {isProfileComplete ? "View Profile" : "Create Profile"}</Link>
 
                 <Link to="/organizer/view-post" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Posts</Link>
+                <div className="relative group">
+                  <button onClick={toggleBookingTerms} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" >
+                    Booking Terms
+                    <HiChevronDown className="ml-1 w-4 h-4" />
+                  </button>
+                  {isBookingTermsOpen && (
+                    <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+                      <Link to="/organizer/rules-restrictions" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Rules & Restrictions</Link>
+                      <Link to="/organizer/cancellation-policy" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Payment and Cancellation Policy</Link>
+                    </div>
+                  )}
+                </div>
                 {/* <Link to="/manage-posts" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Manage Posts</Link> */}
                 <Link to="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</Link>
                 <button onClick={signOut} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</button>
@@ -103,6 +120,16 @@ const Header: React.FC = () => {
             <button onClick={handleProfileLinkClick} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
               Profile
             </button>
+            {/* Booking Terms Dropdown */}
+            <button onClick={toggleBookingTerms} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+              Booking Terms
+            </button>
+            {isBookingTermsOpen && (
+              <div className="pl-4">
+                <Link to="/organizer/rules-restrictions" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Rules & Restrictions</Link>
+                <Link to="/organizer/cancellation-policy" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Payment and Cancellation Policy</Link>
+              </div>
+            )}
             <Link to="/posts" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Posts</Link>
             <Link to="/manage-posts" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Manage Posts</Link>
             <Link to="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</Link>

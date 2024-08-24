@@ -12,6 +12,8 @@ import OrgPostForm from "../pages/organizer/Org-Post";
 import ErrorBoundary from "../components/ErrorBoundary";
 import ViewPost from "../pages/organizer/View-Post";
 import ViewProfile from "../pages/organizer/ViewProfile";
+import RulesAndRestrictions from "../components/user/RulesRestrictions";
+import CancellationPolicy from "../components/user/CancellationPolicy";
 
 
 
@@ -31,6 +33,8 @@ const OrganizerRoutes: React.FC = () => {
                     <Route path='/post' element={< OrgPostForm />} />
                     <Route path="/view-post" element={<ViewPost />} />
                     <Route path="/view-profile" element={<ViewProfile />} />
+                    <Route path="/rules-restrictions" element={<RulesAndRestrictions />} />
+                    <Route path="/cancellation-policy" element={<CancellationPolicy />} />
                 </Route>
             </Routes>
         </ErrorBoundary>

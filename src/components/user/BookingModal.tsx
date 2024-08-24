@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactModal from 'react-modal';
 import { FaTimes } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -8,6 +9,7 @@ interface BookingModalProps {
   selectedDate: Date;
   availability: string[];
   onBook: (type: 'day' | 'night' | 'full') => void;
+  organizerId: string;
 }
 
 const BookingModal: React.FC<BookingModalProps> = ({
@@ -16,9 +18,23 @@ const BookingModal: React.FC<BookingModalProps> = ({
   selectedDate,
   availability,
   onBook,
+  organizerId,
 }) => {
-  const isDayBooked = availability.includes('Full Day') || availability.includes('Day');
-  const isNightBooked = availability.includes('Full Day') || availability.includes('Night');
+
+  const navigate = useNavigate();
+  const handleBook = (type: 'day' | 'night' | 'full') => {
+    onBook(type);
+    navigate('/user/book-event-hall/confirm', {
+      state:{
+        bookingType: type,
+        selectedDate,
+        organizerId,
+      }
+    });
+  }
+
+  const isDayBooked = availability.includes('Day');
+  const isNightBooked = availability.includes('Night');
   const isFullDayBooked = availability.includes('Full Day');
 
   return (
@@ -27,7 +43,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
       onRequestClose={onRequestClose}
       contentLabel="Booking Modal"
       ariaHideApp={false}
-      className="relative p-6 bg-red-200 rounded-lg shadow-lg max-w-md mx-auto mt-16"
+      className="relative p-6 bg-white rounded-lg shadow-lg max-w-md mx-auto mt-16"
       overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-50"
     >
       <button
@@ -51,7 +67,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
             {!isDayBooked && (
               <button
                 className={`px-4 py-2 rounded ${isNightBooked ? 'bg-blue-300' : 'bg-blue-500 text-white'}`}
-                onClick={() => onBook('day')}
+                onClick={() => handleBook('day')}
                 disabled={isNightBooked}
                 aria-disabled={isNightBooked}
                 title={isNightBooked ? 'Night booking is unavailable' : ''}
@@ -62,7 +78,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
             {!isNightBooked && (
               <button
                 className={`px-4 py-2 rounded ${isDayBooked ? 'bg-yellow-300' : 'bg-yellow-500 text-white'}`}
-                onClick={() => onBook('night')}
+                onClick={() => handleBook('night')}
                 disabled={isDayBooked}
                 aria-disabled={isDayBooked}
                 title={isDayBooked ? 'Day booking is unavailable' : ''}
@@ -70,13 +86,10 @@ const BookingModal: React.FC<BookingModalProps> = ({
                 Book Night
               </button>
             )}
-            {!isFullDayBooked && (
+            {!isDayBooked && !isNightBooked && (
               <button
-                className={`px-4 py-2 rounded ${isFullDayBooked ? 'bg-red-300' : 'bg-red-500 text-white'}`}
-                onClick={() => onBook('full')}
-                disabled={isFullDayBooked}
-                aria-disabled={isFullDayBooked}
-                title={isFullDayBooked ? 'Full Day booking is unavailable' : ''}
+                className="px-4 py-2 bg-red-500 text-white rounded"
+                onClick={() => handleBook('full')}
               >
                 Book Full Day
               </button>
