@@ -14,6 +14,7 @@ import ViewPost from "../pages/organizer/View-Post";
 import ViewProfile from "../pages/organizer/ViewProfile";
 import RulesAndRestrictions from "../components/user/RulesRestrictions";
 import CancellationPolicy from "../components/user/CancellationPolicy";
+import HandleDates from "../pages/organizer/HandleDates";
 
 
 
@@ -35,6 +36,7 @@ const OrganizerRoutes: React.FC = () => {
                     <Route path="/view-profile" element={<ViewProfile />} />
                     <Route path="/rules-restrictions" element={<RulesAndRestrictions />} />
                     <Route path="/cancellation-policy" element={<CancellationPolicy />} />
+                    <Route path="/handle-dates" element={<HandleDates />} />
                 </Route>
             </Routes>
         </ErrorBoundary>

@@ -122,8 +122,7 @@ const BookingCalendar: React.FC = () => {
 
   const handleBook = (type: 'day' | 'night' | 'full') => {
     console.log(`Booking ${type} for ${selectedDate}`);
-    // Add your booking logic here
-    setIsModalOpen(false); // Close the modal after booking
+    setIsModalOpen(false); 
   };
 
   return (

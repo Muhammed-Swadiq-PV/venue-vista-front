@@ -1,4 +1,4 @@
-import React, { useState, useEffect,  Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Header from '../../components/organizer/Header';
 import Footer from '../../components/organizer/Footer';
 import ErrorBoundary from '../../components/ErrorBoundary';
@@ -16,12 +16,12 @@ const LazyImage: React.FC<{ src: string; alt: string }> = ({ src, alt }) => (
 );
 
 const Home: React.FC = () => {
-useAuthRedirect();
+  useAuthRedirect();
 
   const navigate = useNavigate();
 
   // checking that organizer already added post about venue and navigating based on that
-  
+
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [hasPost, setHasPost] = useState(false);
   const [totalPages, setTotalPages] = useState()
@@ -33,7 +33,7 @@ useAuthRedirect();
         if (organizerId) {
           const response = await axios.get(`${API_BASE_URL}/organizer/post/${organizerId}`,
             {
-              params:{
+              params: {
                 page,
                 limit,
               },
@@ -52,18 +52,22 @@ useAuthRedirect();
 
     fetchPostData();
   }, []);
-  
+
 
   const handleButtonClick = () => {
-    if(hasPost){
+    if (hasPost) {
       navigate('/organizer/view-post')
-    }else{
+    } else {
       navigate('/organizer/post');
     }
   };
 
+  const handleDates = () => {
+    navigate('/organizer/handle-dates')
+  }
+
   if (!isDataLoaded) {
-    return <Spinner text='Loading data.....'/>;
+    return <Spinner text='Loading data.....' />;
   }
 
   return (
@@ -89,10 +93,10 @@ useAuthRedirect();
                     you can post images of your hall here.
                   </p>
                   <div className='flex justify-center'>
-                  <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 "
-                  onClick={handleButtonClick}>
-                     Your event hall
-                  </button>
+                    <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 "
+                      onClick={handleButtonClick}>
+                      Your event hall
+                    </button>
                   </div>
                 </div>
               </ErrorBoundary>
@@ -115,9 +119,9 @@ useAuthRedirect();
                     <li>Showcase high-quality images and virtual tours</li>
                   </ul>
                   <div className='flex justify-center'>
-                  {/* <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700">
-                    Learn More
-                  </button> */}
+                    <button onClick={handleDates} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700">
+                      Manage By Dates
+                    </button>
                   </div>
                 </div>
               </ErrorBoundary>
