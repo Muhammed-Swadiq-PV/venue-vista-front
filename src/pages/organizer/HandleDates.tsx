@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import PriceDetailsModal from '../../components/organizer/PriceDetailsModal';
@@ -7,6 +7,7 @@ import axiosInstance from '../../axios/axiosInterceptor';
 import { Prices } from '../../types/prices';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import DayModal from '../../components/organizer/DayModal';
 import { API_BASE_URL } from '../../apiConfig';
 import Cookies from 'js-cookie';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -31,39 +32,65 @@ const HandleDates: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
     const [eventDetails, setEventDetails] = useState<Event | null>(null);
+    const [selectedDay, setSelectedDay] = useState<string | null>(null);
+    const [isDayModalOpen, setIsDayModalOpen] = useState(false);
+
     const [initialPrices, setInitialPrices] = useState<Prices>({
         dayPrice: '',
         nightPrice: '',
         fullDayPrice: ''
     });
 
+    const [weeklyPrices, setWeeklyPrices] = useState<{
+        [key: string]: { dayPrice: number; nightPrice: number; fullDayPrice: number }
+    }>({
+        Monday: { dayPrice: 0, nightPrice: 0, fullDayPrice: 0 },
+        Tuesday: { dayPrice: 0, nightPrice: 0, fullDayPrice: 0 },
+        Wednesday: { dayPrice: 0, nightPrice: 0, fullDayPrice: 0 },
+        Thursday: { dayPrice: 0, nightPrice: 0, fullDayPrice: 0 },
+        Friday: { dayPrice: 0, nightPrice: 0, fullDayPrice: 0 },
+        Saturday: { dayPrice: 0, nightPrice: 0, fullDayPrice: 0 },
+        Sunday: { dayPrice: 0, nightPrice: 0, fullDayPrice: 0 }
+    });
+
+
     const organizerId = Cookies.get('OrganizerId');
 
-    useEffect(() => {
-        const fetchEvents = async () => {
-            try {
-                const response = await axiosInstance.get(`${API_BASE_URL}/organizers/events`);
-                const fetchedEvents = response.data.map((event: any) => ({
-                    title: event.title,
-                    start: new Date(event.start),
-                    end: new Date(event.end),
-                    type: event.type,
-                    color: event.type === 'full' ? '#ef4444' : event.type === 'day' ? '#3b82f6' : '#f59e0b',
-                    details: event.details,
-                }));
-                setEvents(fetchedEvents);
-            } catch (error) {
-                console.error('Error fetching events:', error);
-            }
-        };
+    const fetchEvents = useCallback(async (start: Date, end: Date) => {
+        try {
+            const response = await axiosInstance.get(`${API_BASE_URL}/organizers/events`, {
+                params: {
+                    start: start.toISOString(),
+                    end: end.toISOString(),
+                    organizerId: organizerId
+                }
+            });
+            const fetchedEvents = response.data.map((event: any) => ({
+                title: event.title,
+                start: new Date(event.start),
+                end: new Date(event.end),
+                type: event.type,
+                color: event.type === 'full' ? '#ef4444' : event.type === 'day' ? '#3b82f6' : '#f59e0b',
+                details: event.details,
+            }));
+            setEvents(fetchedEvents);
+        } catch (error) {
+            console.error('Error fetching events:', error);
+        }
+    }, [organizerId]);
 
-        fetchEvents();
-    }, []);
+    useEffect(() => {
+        const now = new Date();
+        const start = new Date(now.getFullYear(), now.getMonth(), 1);
+        const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        fetchEvents(start, end);
+    }, [fetchEvents]);
+
 
     const handleDateClick = async (date: Date) => {
         const today = moment().startOf('day');
         setSelectedDate(date);
-    
+
         if (moment(date).isBefore(today, 'day')) {
             // Past date showing booking details
             const pastEvent = events.find(event =>
@@ -84,20 +111,20 @@ const HandleDates: React.FC = () => {
                         organizerId: organizerId
                     }
                 });
-    
+
                 const existingPrices = response.data.prices;
                 console.log('Existing price:', existingPrices);
-    
+
                 const defaultDayPrice = 100;
                 const defaultNightPrice = 80;
                 const defaultFullDayPrice = 150;
-    
+
                 setInitialPrices({
                     dayPrice: existingPrices.dayPrice || defaultDayPrice,
                     nightPrice: existingPrices.nightPrice || defaultNightPrice,
                     fullDayPrice: existingPrices.fullDayPrice || defaultFullDayPrice,
                 });
-    
+
                 setIsModalOpen(true);
                 setEventDetails({
                     ...existingPrices,
@@ -110,7 +137,7 @@ const HandleDates: React.FC = () => {
             }
         }
     };
-    
+
 
 
     const handleSavePrices = async (prices: { dayPrice: number; nightPrice: number; fullDayPrice: number }) => {
@@ -124,6 +151,20 @@ const HandleDates: React.FC = () => {
         } catch (error) {
             console.error('Error saving prices:', error);
             toast.error('Failed to update prices. Please try again.');
+        }
+    };
+
+
+    const handleSaveWeeklyPrices = async () => {
+        try {
+            await axiosInstance.post(`${API_BASE_URL}/organizer/default-prices`, {
+                organizerId: organizerId,
+                weeklyPrices: weeklyPrices
+            });
+            toast.success('Default weekly prices updated successfully!');
+        } catch (error) {
+            console.error('Error saving weekly prices:', error);
+            toast.error('Failed to update weekly prices. Please try again.');
         }
     };
 
@@ -146,6 +187,46 @@ const HandleDates: React.FC = () => {
                 <div className="text-lg font-bold mt-10 mb-4 text-center">
                     Manage Dates & Prices
                 </div>
+                <div className="mb-8">
+                    <h3 className="text-md font-semibold mb-4">Set Default Weekly Prices</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        {Object.keys(weeklyPrices).map(day => (
+                            <button
+                                key={day}
+                                className="p-4 border rounded-lg shadow hover:bg-gray-100"
+                                onClick={() => {
+                                    setSelectedDay(day);
+                                    setIsDayModalOpen(true);
+                                }}
+                            >
+                                <h4 className="font-semibold">{day}</h4>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                <div className="flex justify-center text-right mt-4">
+                    <button
+                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                        onClick={handleSaveWeeklyPrices}
+                    >
+                        Save Default Prices
+                    </button>
+                </div>
+
+                {isDayModalOpen && selectedDay && (
+                    <DayModal
+                        isOpen={isDayModalOpen}
+                        onRequestClose={() => setIsDayModalOpen(false)}
+                        day={selectedDay}
+                        prices={weeklyPrices[selectedDay]}
+                        onSavePrices={(day, prices) => {
+                            setWeeklyPrices(prev => ({
+                                ...prev,
+                                [day]: prices
+                            }));
+                        }}
+                    />
+                )}
                 <div className="relative mt-14 h-[70vh] w-[70vw] mx-auto bg-blue-50 shadow-lg rounded-lg">
                     <Calendar
                         localizer={localizer}
