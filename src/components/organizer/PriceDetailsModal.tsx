@@ -23,15 +23,11 @@ const PriceDetailsModal: React.FC<PriceDetailsModalProps> = ({
 }) => {
     const organizerId = Cookies.get('OrganizerId');
 
-    // Define default prices
-    const defaultDayPrice = 100;
-    const defaultNightPrice = 80;
-    const defaultFullDayPrice = 150;
 
     // Initialize state with default values if not provided
-    const [dayPrice, setDayPrice] = useState<number | ''>(initialPrices.dayPrice || defaultDayPrice);
-    const [nightPrice, setNightPrice] = useState<number | ''>(initialPrices.nightPrice || defaultNightPrice);
-    const [fullDayPrice, setFullDayPrice] = useState<number | ''>(initialPrices.fullDayPrice || defaultFullDayPrice);
+    const [dayPrice, setDayPrice] = useState<number | ''>(initialPrices.dayPrice || '' );
+    const [nightPrice, setNightPrice] = useState<number | ''>(initialPrices.nightPrice || '' );
+    const [fullDayPrice, setFullDayPrice] = useState<number | ''>(initialPrices.fullDayPrice || '' );
     const [isLoading, setIsLoading] = useState(false);
 
 
@@ -90,7 +86,7 @@ const PriceDetailsModal: React.FC<PriceDetailsModalProps> = ({
                         value={dayPrice}
                         onChange={(e) => setDayPrice(Number(e.target.value))}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                        placeholder={`Enter day price (default: $${defaultDayPrice})`}
+                         placeholder="Enter day price"
                     />
                 </div>
 
@@ -101,7 +97,7 @@ const PriceDetailsModal: React.FC<PriceDetailsModalProps> = ({
                         value={nightPrice}
                         onChange={(e) => setNightPrice(Number(e.target.value))}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                        placeholder={`Enter night price (default: $${defaultNightPrice})`}
+                        placeholder="Enter night price"
                     />
                 </div>
 
@@ -112,7 +108,7 @@ const PriceDetailsModal: React.FC<PriceDetailsModalProps> = ({
                         value={fullDayPrice}
                         onChange={(e) => setFullDayPrice(Number(e.target.value))}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                        placeholder={`Enter full day price (default: $${defaultFullDayPrice})`}
+                         placeholder="Enter full day price"
                     />
                 </div>
 

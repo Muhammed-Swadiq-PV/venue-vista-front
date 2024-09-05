@@ -34,6 +34,7 @@ const HandleDates: React.FC = () => {
     const [eventDetails, setEventDetails] = useState<Event | null>(null);
     const [selectedDay, setSelectedDay] = useState<string | null>(null);
     const [isDayModalOpen, setIsDayModalOpen] = useState(false);
+    const [showAnnouncement, setShowAnnouncement] = useState(true);
 
     const [initialPrices, setInitialPrices] = useState<Prices>({
         dayPrice: '',
@@ -115,14 +116,10 @@ const HandleDates: React.FC = () => {
                 const existingPrices = response.data.prices;
                 console.log('Existing price:', existingPrices);
 
-                const defaultDayPrice = 100;
-                const defaultNightPrice = 80;
-                const defaultFullDayPrice = 150;
-
                 setInitialPrices({
-                    dayPrice: existingPrices.dayPrice || defaultDayPrice,
-                    nightPrice: existingPrices.nightPrice || defaultNightPrice,
-                    fullDayPrice: existingPrices.fullDayPrice || defaultFullDayPrice,
+                    dayPrice: existingPrices.dayPrice ,
+                    nightPrice: existingPrices.nightPrice ,
+                    fullDayPrice: existingPrices.fullDayPrice ,
                 });
 
                 setIsModalOpen(true);
@@ -144,6 +141,7 @@ const HandleDates: React.FC = () => {
         try {
             await axiosInstance.post(`${API_BASE_URL}/organizer/events/prices`, {
                 date: selectedDate,
+                organizerId: organizerId,
                 ...prices,
             });
             setIsModalOpen(false);
@@ -183,6 +181,21 @@ const HandleDates: React.FC = () => {
     return (
         <>
             <Header />
+            {showAnnouncement && (
+                <div className="bg-yellow-100 text-yellow-800 p-4 rounded-lg shadow-md mb-4">
+                    <h3 className="font-semibold text-lg">Important Notice</h3>
+                    <p className="mt-2">
+                        Before you start managing individual dates, please ensure you have set default weekly prices. These will apply throughout the year.
+                        Use the calendar to manage special dates where you may want to adjust prices. Click on a date to view or update prices.
+                    </p>
+                    <button
+                        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                        onClick={() => setShowAnnouncement(false)}
+                    >
+                        Got It!
+                    </button>
+                </div>
+            )}
             <div className="p-4 max-w-6xl mx-auto">
                 <div className="text-lg font-bold mt-10 mb-4 text-center">
                     Manage Dates & Prices

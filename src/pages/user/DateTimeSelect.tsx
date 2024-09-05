@@ -3,13 +3,15 @@ import Header from '../../components/user/Header';
 import Footer from '../../components/user/Footer';
 import { useParams } from 'react-router-dom';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
-import BookingModal from '../../components/user/BookingModal';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import moment from 'moment';
 import { API_BASE_URL } from '../../apiConfig';
 import axiosInstance from '../../axios/axiosInterceptor';
 import useAuthRedirect from '../../axios/useAuthRedirect';
 import ErrorBoundary from '../../components/ErrorBoundary';
+import { useNavigate } from 'react-router-dom';
 
 const localizer = momentLocalizer(moment);
 
@@ -25,13 +27,13 @@ interface Event {
 const BookingCalendar: React.FC = () => {
   useAuthRedirect();
 
+  const navigate = useNavigate();
+
   const { id } = useParams<{ id: string }>();
   const [eventHallName, setEventHallName] = useState<string>('');
   const [organizerId , setOrganizerId] = useState<string>('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [availability, setAvailability] = useState<string[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   useEffect(() => {
     const fetchEventHallName = async () => {
@@ -111,29 +113,37 @@ const BookingCalendar: React.FC = () => {
       return;
     }
 
-    setSelectedDate(date);
-    const dayEvents = events.filter((event) =>
-      moment(date).isSame(event.start, 'day')
-    );
-    const availabilityText = dayEvents.map(event => event.title);
-    setAvailability(availabilityText);
-    setIsModalOpen(true);
+    navigate(`/user/booking-details/${organizerId}`, {
+      state: { selectedDate: date },
+    });
   };
 
-  const handleBook = (type: 'day' | 'night' | 'full') => {
-    console.log(`Booking ${type} for ${selectedDate}`);
-    setIsModalOpen(false); 
+  const handleDateSelection = (date: Date | null) => {
+    if (date) {
+      setSelectedDate(date);
+      handleDateClick(date); 
+    }
   };
 
   return (
     <ErrorBoundary>
+    <div className="flex flex-col min-h-screen">
       <Header />
 
-      <div className="p-4 max-w-6xl mx-auto sm:h-screen">
+      <div className="flex-grow p-4 max-w-6xl mx-auto">
         <div className="text-lg font-bold mt-10 mb-4 text-center">
           {eventHallName || 'Loading...'}
         </div>
-        <div className="relative mt-14 h-[70vh] w-[70vw] mx-auto bg-blue-50 shadow-lg rounded-lg">
+        <div className="flex justify-center mb-6">
+          <DatePicker
+            selected={selectedDate}
+            onChange={handleDateSelection}
+            dateFormat="MMMM d, yyyy"
+            placeholderText="Select a date"
+            className="border p-2 rounded"
+          />
+        </div>
+        <div className="relative mt-14 h-[70vh] w-[60vw] mx-auto bg-blue-50 shadow-lg rounded-lg">
           <Calendar
             localizer={localizer}
             events={events}
@@ -162,19 +172,8 @@ const BookingCalendar: React.FC = () => {
           />
         </div>
       </div>
-
-      {isModalOpen && selectedDate && (
-        <BookingModal
-          isOpen={isModalOpen}
-          onRequestClose={() => setIsModalOpen(false)}
-          selectedDate={selectedDate}
-          availability={availability}
-          onBook={handleBook}
-          organizerId={organizerId}
-        />
-      )}
-
       <Footer />
+      </div>
     </ErrorBoundary>
   );
 };

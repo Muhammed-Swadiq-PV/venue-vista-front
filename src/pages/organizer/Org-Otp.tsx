@@ -16,7 +16,6 @@ const OtpPage: React.FC = () => {
     // Retrieve email from query parameter
     const searchParams = new URLSearchParams(location.search);
     const organizerEmail = searchParams.get('email');
-    // console.log(userEmail,'aswin')
     useEffect(() => {
         if (!organizerEmail) {
             // Handle case where email is not present
