@@ -28,7 +28,7 @@ const OrganizerManagement: React.FC = () => {
           params: { page: currentPage, limit: ITEMS_PER_PAGE }
         });
         setOrganizers(response.data.organizers);
-        setTotalPages(response.data.totalPages);
+        setTotalPages(response.data.totalPages);  
       } catch (error) {
         console.error('Error fetching organizers:', error);
       } finally {

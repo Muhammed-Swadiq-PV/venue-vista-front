@@ -112,8 +112,7 @@ const BookingCalendar: React.FC = () => {
     if (moment(date).isBefore(today, 'day')) {
       return;
     }
-
-    navigate(`/user/booking-details/${organizerId}`, {
+    navigate(`/user/booking-details/${organizerId}/${id}`, {
       state: { selectedDate: date },
     });
   };

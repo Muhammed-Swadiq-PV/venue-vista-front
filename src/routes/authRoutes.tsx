@@ -33,7 +33,7 @@ const AuthRoutes: React.FC = () => {
                         <Route path="/event-hall/:id" element={<EventHallDetails />} />
                         <Route path="/create-profile" element={<CreateProfile />} />
                         <Route path="/book-event-hall/date-time/:id" element={<BookingCalendar/>}/>
-                        <Route path="/booking-details/:organizerId" element={<BookingDetails/>}/>
+                        <Route path="/booking-details/:organizerId/:id" element={<BookingDetails/>}/>
                     </Route>
                 </Routes>
             </SearchProvider>
