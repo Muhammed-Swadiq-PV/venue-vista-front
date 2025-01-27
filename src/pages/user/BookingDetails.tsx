@@ -125,7 +125,7 @@ const BookingDetails: React.FC = () => {
             );
             if (response.status === 200) {
 
-                console.log(response.data, 'response')
+                // console.log(response.data, 'response')
                 const { bookingId, status } = response.data;
 
                 setBookingDetails([...bookingDetails, { ...response.data, bookingId, status }
@@ -144,13 +144,11 @@ const BookingDetails: React.FC = () => {
     };
 
     const handlePaymentSuccess = () => {
-        // Show a success message
         toast.success("Payment successful! Redirecting to your bookings...");
 
-        // Redirect to "My Bookings" page after a short delay
         setTimeout(() => {
             navigate("/user/my-bookings");
-        }, 3000); // 3 seconds delay for user to read the toast
+        }, 3000); 
     };
 
 

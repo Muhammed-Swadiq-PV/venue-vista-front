@@ -306,7 +306,7 @@ const Header: React.FC = () => {
                     Create Profile
                   </Link>
                 )}
-                <Link to="/my-bookings" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">My Bookings</Link>
+                <Link to="/user/my-bookings" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">My Bookings</Link>
                 <Link to="/payments" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Payments</Link>
                 <button
                   onClick={signOut}

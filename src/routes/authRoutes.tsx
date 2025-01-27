@@ -15,6 +15,7 @@ import { OrganizerProvider } from "../contexts/useNearestOrganizer";
 import { SearchProvider } from "../contexts/SearchContext";
 import BookingCalendar from "../pages/user/DateTimeSelect";
 import BookingDetails from "../pages/user/BookingDetails";
+import MyBookings from "../pages/user/MyBookings";
 
 
 const AuthRoutes: React.FC = () => {
@@ -34,6 +35,7 @@ const AuthRoutes: React.FC = () => {
                         <Route path="/create-profile" element={<CreateProfile />} />
                         <Route path="/book-event-hall/date-time/:id" element={<BookingCalendar/>}/>
                         <Route path="/booking-details/:organizerId/:id" element={<BookingDetails/>}/>
+                        <Route path="/my-bookings" element={<MyBookings/>}/>
                     </Route>
                 </Routes>
             </SearchProvider>
