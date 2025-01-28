@@ -5,8 +5,10 @@ import { format } from 'date-fns';
 import Cookies from 'js-cookie';
 import { API_BASE_URL } from '../../apiConfig';
 
-import { CalendarIcon, ClockIcon, MapPinIcon,MailIcon,PhoneIcon,UserIcon } from 'lucide-react';
+import { CalendarIcon, ClockIcon, MapPinIcon, MailIcon, PhoneIcon, UserIcon } from 'lucide-react';
 import Header from '../../components/user/Header';
+import BookingDetailModal from './BookingDetailModal';
+
 
 const userId = Cookies.get('userId');
 
@@ -38,15 +40,19 @@ interface Booking {
 const MyBookings: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [modalContent, setModalContent] = React.useState('');
+  const [modalTitle, setModalTitle] = React.useState('');
+
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchUserBookings();
   }, []);
 
-  // useEffect(() => {
-  //   console.log("Current Bookings:", bookings);
-  // }, [bookings]);
+  useEffect(() => {
+    console.log("Current Bookings:", bookings);
+  }, [bookings]);
 
   const fetchUserBookings = async () => {
     try {
@@ -54,27 +60,43 @@ const MyBookings: React.FC = () => {
       // console.log(response.data, 'response')
 
 
- const transformedBookings: Booking[] = response.data.map((data: any) => ({
-      ...data,
-      venue: {
-        name: data.organizerDetails.name,
-        email: data.organizerDetails.email,
-        phoneNumber: data.organizerDetails.phoneNumber,
-        location: {
-          buildingFloor: data.organizerDetails.buildingFloor,
-          city: data.organizerDetails.city,
-          district: data.organizerDetails.district,
-          pincode: data.organizerDetails.pincode,
+      const transformedBookings: Booking[] = response.data.map((data: any) => ({
+        ...data,
+        venue: {
+          name: data.organizerDetails.name,
+          email: data.organizerDetails.email,
+          phoneNumber: data.organizerDetails.phoneNumber,
+          rulesAndRestrictions: data.organizerDetails.rulesAndRestrictions,
+          paymentPolicy: data.organizerDetails.paymentPolicy,
+          location: {
+            buildingFloor: data.organizerDetails.buildingFloor,
+            city: data.organizerDetails.city,
+            district: data.organizerDetails.district,
+            pincode: data.organizerDetails.pincode,
+          },
         },
-      },
-    }));
-    setBookings(transformedBookings);
+      }));
+      setBookings(transformedBookings);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching bookings:', error);
       setLoading(false);
     }
   };
+
+
+  const openModal = (title: string, content: string) => {
+    setModalTitle(title);
+    setModalContent(content);
+    setIsModalOpen(true);
+  };
+  
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setModalContent('');
+    setModalTitle('');
+  };
+  
 
   const handleBookAgain = (venue: any) => {
     navigate(`/venue/${venue._id}`);
@@ -159,32 +181,44 @@ const MyBookings: React.FC = () => {
                 </div>
 
                 <div className="space-y-4">
-                    {/* Contact Details */}
-                   
-                    <div className="flex items-center">
-                      <PhoneIcon className="mr-3 text-gray-500" size={20} />
-                      <div>
-                        <p className="font-medium">Contact Number</p>
-                        <p>{booking.venue.phoneNumber}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center">
-                      <MailIcon className="mr-3 text-gray-500" size={20} />
-                      <div>
-                        <p className="font-medium">Email</p>
-                        <p>{booking.venue.email}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center">
-                      <UserIcon className="mr-3 text-gray-500" size={20} />
-                      <div>
-                        <p className="font-medium">Booked By</p>
-                        <p>{booking.userName}</p>
-                      </div>
+                  {/* Contact Details */}
+
+                  <div className="flex items-center">
+                    <PhoneIcon className="mr-3 text-gray-500" size={20} />
+                    <div>
+                      <p className="font-medium">Contact Number</p>
+                      <p>{booking.venue.phoneNumber}</p>
                     </div>
                   </div>
+                  <div className="flex items-center">
+                    <MailIcon className="mr-3 text-gray-500" size={20} />
+                    <div>
+                      <p className="font-medium">Email</p>
+                      <p>{booking.venue.email}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center">
+                    <UserIcon className="mr-3 text-gray-500" size={20} />
+                    <div>
+                      <p className="font-medium">Booked By</p>
+                      <p>{booking.userName}</p>
+                    </div>
+                  </div>
+                </div>
 
-
+                {/* Buttons for Modal */}
+                <button
+                  onClick={() => openModal('Rules & Restrictions', booking.venue.rulesAndRestrictions || 'N/A')}
+                  className="text-blue-600 mt-4 underline"
+                >
+                  View Rules & Restrictions
+                </button>
+                <button
+                  onClick={() => openModal('Cancellation Policy', booking.venue.paymentPolicy || 'N/A')}
+                  className="text-blue-600 mt-4 underline ml-4"
+                >
+                  View Cancellation Policy
+                </button>
 
                 <div className="flex justify-between items-center">
                   <button
@@ -204,6 +238,15 @@ const MyBookings: React.FC = () => {
             ))}
           </div>
         )}
+
+        {/* Booking Detail Modal */}
+        <BookingDetailModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          title={modalTitle}
+          content={modalContent}
+        />
+
       </div>
     </div>
 
