@@ -4,10 +4,12 @@ import axiosInstance from '../../axios/axiosInterceptor';
 import { format } from 'date-fns';
 import Cookies from 'js-cookie';
 import { API_BASE_URL } from '../../apiConfig';
+import { toast } from 'react-toastify';
 
 import { CalendarIcon, ClockIcon, MapPinIcon, MailIcon, PhoneIcon, UserIcon } from 'lucide-react';
 import Header from '../../components/user/Header';
 import BookingDetailModal from './BookingDetailModal';
+import CancellationModal from './CancellationModal';
 
 
 const userId = Cookies.get('userId');
@@ -40,9 +42,11 @@ interface Booking {
 const MyBookings: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [modalContent, setModalContent] = React.useState('');
-  const [modalTitle, setModalTitle] = React.useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState('');
+  const [modalTitle, setModalTitle] = useState('');
+  const [isCancellationModalOpen, setIsCancellationModalOpen] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
@@ -96,6 +100,52 @@ const MyBookings: React.FC = () => {
     setModalContent('');
     setModalTitle('');
   };
+  //cancellation modal
+  const handleCancelBooking = (bookingId: string) => {
+    setSelectedBookingId(bookingId); 
+    setIsCancellationModalOpen(true); 
+  };
+
+  //close cancellation modal
+  const handleCloseCancellationModal = () => {
+    setIsCancellationModalOpen(false);
+    setSelectedBookingId(null);
+  };
+  // confirm cancellation booking
+  const handleConfirmCancellation = async ( cancellationReason: string) => {
+    if (selectedBookingId) {
+      try {
+        const response = await axiosInstance.post(
+          `${API_BASE_URL}/users/bookings/${selectedBookingId}/cancel`,
+          { cancellationReason }
+        );
+   
+        if (response.status === 200) {
+          setBookings(prevBookings =>
+            prevBookings.filter(booking => booking._id !== selectedBookingId)
+          );
+  
+          setIsCancellationModalOpen(false);
+          setSelectedBookingId(null);
+  
+          toast.success('Booking canceled successfully!', {
+            position: 'top-right',
+            autoClose: 3000,
+          });
+
+        } else {
+          throw new Error('Failed to cancel booking');
+        }
+      } catch (error) {
+        console.error('Error canceling booking:', error);
+        toast.error('Failed to cancel booking. Please try again.', {
+          position: 'top-right',
+          autoClose: 3000,
+        });
+      }
+    }
+  };
+  
   
 
   const handleBookAgain = (venue: any) => {
@@ -220,6 +270,17 @@ const MyBookings: React.FC = () => {
                   View Cancellation Policy
                 </button>
 
+                 {/* Conditional Rendering for Cancel Button */}
+              {booking.status === 'confirmed' && (
+                <button
+                  onClick={() => 
+                    handleCancelBooking(booking._id)}
+                  className="bg-red-50 text-red-600 px-4 py-2 rounded-md hover:bg-red-100 mt-4 w-full"
+                >
+                  Cancel Booking
+                </button>
+              )}
+
                 <div className="flex justify-between items-center">
                   <button
                     onClick={() => handleBookAgain(booking.venue)}
@@ -246,7 +307,12 @@ const MyBookings: React.FC = () => {
           title={modalTitle}
           content={modalContent}
         />
-
+        {/* Cancellation Modal */}
+      <CancellationModal
+        isOpen={isCancellationModalOpen}
+        onClose={handleCloseCancellationModal}
+        onConfirm={handleConfirmCancellation}
+      />
       </div>
     </div>
 
