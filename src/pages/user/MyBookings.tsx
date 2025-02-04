@@ -54,9 +54,9 @@ const MyBookings: React.FC = () => {
     fetchUserBookings();
   }, []);
 
-  useEffect(() => {
-    console.log("Current Bookings:", bookings);
-  }, [bookings]);
+  // useEffect(() => {
+  //   console.log("Current Bookings:", bookings);
+  // }, [bookings]);
 
   const fetchUserBookings = async () => {
     try {

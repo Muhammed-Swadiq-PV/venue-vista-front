@@ -5,7 +5,7 @@ const SideMenu: React.FC = () => {
     const location = useLocation();
 
     return (
-        <nav className="w-1/4 bg-gradient-to-r bg-customBlue p-4 text-white">
+        <nav className="w-1/6 bg-gradient-to-r bg-customBlue p-4 text-white">
             <ul>
                 <li
                     className={`mb-2 flex items-center ${location.pathname === '/admin/user-management' ? 'bg-white text-customBlue' : 'hover:bg-white hover:text-customBlue'} p-2 rounded`}
