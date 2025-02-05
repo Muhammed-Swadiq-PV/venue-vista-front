@@ -5,7 +5,7 @@ import { API_BASE_URL } from "../../apiConfig";
 
 interface GraphData {
     name: string;
-    value: string;
+    value: number;
     month?: string;
     bookings?: number;
 }
@@ -15,15 +15,7 @@ const AdminGraph: React.FC = () => {
     const [yearlyData, setYearlyData] = useState<GraphData[]>([]);
     const [selectedMonth, setSelectedMonth] = useState<string>((new Date().getMonth() + 1).toString().padStart(2, '0'));
     const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
-
-    const currentDate = new Date();
-    const month = selectedMonth;
-    const year = selectedYear;
-
-    console.log(month, year, 'month and year')
-
-
-
+    const [yearSelected, setYearSelected] = useState<string>(new Date().getFullYear().toString());
 
     useEffect(() => {
         const fetchGraphData = async () => {
@@ -32,12 +24,12 @@ const AdminGraph: React.FC = () => {
                 const monthlyResponse = await axiosInstance.get(`${API_BASE_URL}/admin/bookings/monthly`,
                     {
                         params: {
-                            month,
-                            year
+                            selectedMonth,
+                            selectedYear
                         }
                     }
                 );
-                console.log(monthlyResponse, 'monthly response')
+                // console.log(monthlyResponse, 'monthly response')
                 const formattedMonthlyData = monthlyResponse.data.map((item: { date: string; bookings: number }) => ({
                     name: item.date,
                     value: item.bookings,
@@ -45,22 +37,72 @@ const AdminGraph: React.FC = () => {
                 setMonthlyData(formattedMonthlyData);
 
                 // API call for yearly data
-                const yearlyResponse = await axiosInstance.get(`${API_BASE_URL}/admin/bookings/yearly`);
-                const formattedYearlyData = yearlyResponse.data.map((item: { year: string; totalBookings: number }) => ({
-                    name: item.year,
-                    value: item.totalBookings,
+                const yearlyResponse = await axiosInstance.get(`${API_BASE_URL}/admin/bookings/yearly`,
+                    {
+                        params: {
+                            yearSelected
+                        }
+                    }
+                );
+
+                console.log(yearlyResponse.data, 'year data')
+                const formattedYearlyData = yearlyResponse.data.map((item: { month: string; bookings: number }) => ({
+                    name: item.month,
+                    value: item.bookings,
                 }));
                 setYearlyData(formattedYearlyData);
+                console.log(formattedYearlyData, 'formatted yearly data')
             } catch (error) {
                 console.error("Error fetching booking data", error);
             }
         };
 
         fetchGraphData();
-    }, [month, year]);
+    }, [selectedMonth, selectedYear, yearSelected]);
+
+    const monthOptions = Array.from({ length: 12 }, (_, i) =>
+        ((i + 1).toString().padStart(2, '0'))
+    );
+
+    const yearOptions = Array.from({ length: 5 }, (_, i) =>
+        (new Date().getFullYear() - 2 + i).toString()
+    );
 
     return (
-        <div className="p-4">
+        <div className="pl-4">
+            <div className="flex mb-4 space-x-4">
+                <div className="ml-4 sm:ml-8 md:ml-16 lg:ml-24 xl:ml-32">
+                    <label htmlFor="month-select" className="block text-sm font-medium text-gray-700">Month</label>
+                    <select
+                        id="month-select"
+                        value={selectedMonth}
+                        onChange={(e) => setSelectedMonth(e.target.value)}
+                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                    >
+                        {monthOptions.map(month => (
+                            <option key={month} value={month}>
+                                {month}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div>
+                    <label htmlFor="year-select" className="block text-sm font-medium text-gray-700">Year</label>
+                    <select
+                        id="year-select"
+                        value={selectedYear}
+                        onChange={(e) => setSelectedYear(e.target.value)}
+                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                    >
+                        {yearOptions.map(year => (
+                            <option key={year} value={year}>
+                                {year}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            </div>
             {/* Monthly chart(LineChart) */}
             <section className="mb-8">
                 <h2 className="text-xl font-semibold mb-4">Monthly Booking Trends</h2>
@@ -69,7 +111,7 @@ const AdminGraph: React.FC = () => {
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="name" interval="preserveStartEnd" />
                         <YAxis tickFormatter={(value) => Math.round(value).toString()} allowDecimals={false} />
-                        <Tooltip formatter={(value, name) => [value, 'Bookings']} />
+                        <Tooltip formatter={(value) => [value, 'Bookings']} />
                         <Legend />
                         <Line
                             type="monotone"
@@ -83,6 +125,21 @@ const AdminGraph: React.FC = () => {
                 </ResponsiveContainer>
             </section>
 
+            <div className="flex justify-center my-6">
+                <label htmlFor="year-select" className="mr-2 text-sm font-medium text-gray-700">Select Year:</label>
+                <select
+                    id="year-select"
+                    value={selectedYear}
+                    onChange={(e) => setYearSelected(e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                >
+                    {yearOptions.map(year => (
+                        <option key={year} value={year}>
+                            {year}
+                        </option>
+                    ))}
+                </select>
+            </div>
             {/* Yearly Chart (PieChart) */}
             <section className="mb-8">
                 <h2 className="text-xl font-semibold mb-4">Yearly Booking Insights</h2>

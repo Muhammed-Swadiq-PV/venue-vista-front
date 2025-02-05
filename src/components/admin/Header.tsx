@@ -1,13 +1,14 @@
 // Header.tsx
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaHome, FaUser, FaUsers, FaBell, FaSignOutAlt } from 'react-icons/fa';
+import { FaHome, FaUser, FaUsers, FaBell, FaSignOutAlt, FaBars } from 'react-icons/fa';
 import axiosInstance from '../../axios/axiosInterceptor';
 import { useSignOut } from '../../contexts/AdminSignOut';
 
 
 const Header: React.FC = () => {
   const [pendingRequests, setPendingRequests] = useState<number>(0);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const signOut = useSignOut();
 
   useEffect(() => {
@@ -30,6 +31,10 @@ const Header: React.FC = () => {
     // Clean up the interval on component unmount
     return () => clearInterval(intervalId);
   }, []);
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(prevState => !prevState);
+  };
 
   return (
     <div className='px-2 pt'>
@@ -80,6 +85,45 @@ const Header: React.FC = () => {
           </button>
         </div>
       </header>
+      <div className="md:hidden flex items-center">
+        <button onClick={toggleMobileMenu} className="text-xl">
+          <FaBars />
+        </button>
+      </div>
+      {/* Mobile Navigation (Conditional Rendering) */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden bg-white shadow-lg p-4 rounded-md">
+          <Link to="/admin/dashboard" className="block mb-2">
+            <div className="flex items-center space-x-2">
+              <FaHome className="text-xl" />
+              <span>Home</span>
+            </div>
+          </Link>
+          <Link to="/admin/user-management" className="block mb-2">
+            <div className="flex items-center space-x-2">
+              <FaUser className="text-xl" />
+              <span>User Management</span>
+            </div>
+          </Link>
+          <Link to="/admin/organizer-management" className="block mb-2">
+            <div className="flex items-center space-x-2">
+              <FaUsers className="text-xl" />
+              <span>Organizer Management</span>
+            </div>
+          </Link>
+          <Link to="/admin/notifications" className="block mb-2">
+            <div className="relative flex items-center space-x-2">
+              <FaBell className="text-xl" />
+              {pendingRequests > 0 && (
+                <span className="absolute -top-2 -right-2 inline-flex items-center justify-center w-6 h-6 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                  {pendingRequests}
+                </span>
+              )}
+              <span>Notifications</span>
+            </div>
+          </Link>
+        </div>
+      )}
     </div>
   );
 };
