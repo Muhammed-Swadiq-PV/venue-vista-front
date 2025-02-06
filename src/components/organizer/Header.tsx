@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSignOut } from '../../contexts/OrganizerSignOut';
-import { HiBell, HiChat, HiUser, HiHome, HiMenu, HiChevronDown } from 'react-icons/hi';
+import { HiBell, HiChat, HiUser, HiHome, HiMenu, HiChevronDown, HiChartBar } from 'react-icons/hi';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { API_BASE_URL } from '../../apiConfig';
@@ -73,6 +73,9 @@ const Header: React.FC = () => {
           <Link to="/organizer/messages">
             <HiChat className='w-6 h-6' />
           </Link>
+          <Link to="/organizer/booking-details">
+            <HiChartBar className='w-6 h-6' />
+          </Link>
           <div className="relative">
             <button onClick={toggleProfileDropdown}>
               <HiUser className='w-6 h-6' />
@@ -115,6 +118,10 @@ const Header: React.FC = () => {
           <div className="md:hidden absolute top-16 left-0 right-0 bg-white shadow-lg rounded-md py-2 z-10">
             <Link to="/organizer/home" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Home</Link>
             <Link to="/organizer/notification" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Notifications</Link>
+            <Link to="/organizer/booking-details" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+              Booking Details
+            </Link>
+
             <Link to="/organizer/messages" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Messages</Link>
             {/* <Link to="/organizer/create-profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</Link> */}
             <button onClick={handleProfileLinkClick} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">

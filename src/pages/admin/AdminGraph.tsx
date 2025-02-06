@@ -45,13 +45,11 @@ const AdminGraph: React.FC = () => {
                     }
                 );
 
-                console.log(yearlyResponse.data, 'year data')
                 const formattedYearlyData = yearlyResponse.data.map((item: { month: string; bookings: number }) => ({
                     name: item.month,
                     value: item.bookings,
                 }));
                 setYearlyData(formattedYearlyData);
-                console.log(formattedYearlyData, 'formatted yearly data')
             } catch (error) {
                 console.error("Error fetching booking data", error);
             }
@@ -125,7 +123,7 @@ const AdminGraph: React.FC = () => {
                 </ResponsiveContainer>
             </section>
 
-            <div className="flex justify-center my-6">
+            <div className="flex justify-center my-6 w-full">
                 <label htmlFor="year-select" className="mr-2 text-sm font-medium text-gray-700">Select Year:</label>
                 <select
                     id="year-select"
@@ -141,9 +139,9 @@ const AdminGraph: React.FC = () => {
                 </select>
             </div>
             {/* Yearly Chart (PieChart) */}
-            <section className="mb-8">
+            <section className="mb-8 w-full">
                 <h2 className="text-xl font-semibold mb-4">Yearly Booking Insights</h2>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={450}>
                     <PieChart>
                         <Pie
                             data={yearlyData}

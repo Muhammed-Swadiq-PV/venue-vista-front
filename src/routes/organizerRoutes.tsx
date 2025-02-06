@@ -15,6 +15,7 @@ import ViewProfile from "../pages/organizer/ViewProfile";
 import RulesAndRestrictions from "../components/user/RulesRestrictions";
 import CancellationPolicy from "../components/user/CancellationPolicy";
 import HandleDates from "../pages/organizer/HandleDates";
+import BookingDetails from "../pages/organizer/Booking-Details";
 
 
 
@@ -37,6 +38,7 @@ const OrganizerRoutes: React.FC = () => {
                     <Route path="/rules-restrictions" element={<RulesAndRestrictions />} />
                     <Route path="/cancellation-policy" element={<CancellationPolicy />} />
                     <Route path="/handle-dates" element={<HandleDates />} />
+                    <Route path="/booking-details" element={<BookingDetails/>} />
                 </Route>
             </Routes>
         </ErrorBoundary>

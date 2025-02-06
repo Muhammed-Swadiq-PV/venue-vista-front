@@ -20,7 +20,7 @@ Modal.setAppElement('#root');
 
 const App: React.FC = () => {
     return (
-        < div className='bg-red-50'>
+        < div className='min-h-screen bg-red-50'>
             <Router>
                 <RedirectProvider>
                     <RedirectHandler />
