@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
-    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell
 } from "recharts";
 import useAuthRedirect from "../../axios/useAuthRedirect";
 import Header from "../../components/organizer/Header";
@@ -9,6 +9,7 @@ import Footer from "../../components/organizer/Footer";
 import axiosInstance from "../../axios/axiosInterceptor";
 import { API_BASE_URL } from "../../apiConfig";
 import Cookies from "js-cookie";
+import { format } from "path";
 
 interface Booking {
     _id: string;
@@ -21,55 +22,47 @@ interface Booking {
     status: "confirmed" | "canceled";
 }
 
+interface GraphData {
+    name: string;
+    dayBooking?: number;
+    nightBooking?: string;
+    fullDayBooking?: number;
+}
+
 
 const BookingDetails: React.FC = () => {
     useAuthRedirect();
     const organizerId = Cookies.get('OrganizerId')
-
+    //tab and menu states
     const [selectedTab, setSelectedTab] = useState("bookings");
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    // const [bookingDetails, setBookingDetails] = useState<Booking[]>([]);
-    // const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
-    // const [filterStatus, setFilterStatus] = useState<"all" | "confirmed" | "canceled">("all");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-
+    // booking related states
     const [allBookings, setAllBookings] = useState<Booking[]>([]);
     const [confirmedBookings, setConfirmedBookings] = useState<Booking[]>([]);
     const [canceledBookings, setCanceledBookings] = useState<Booking[]>([]);
     const [displayedBookings, setDisplayedBookings] = useState<Booking[]>([]);
     const [filterStatus, setFilterStatus] = useState<"all" | "confirmed" | "canceled">("all");
+    //graph related states
+    const [monthlyData, setMonthlyData] = useState<GraphData[]>([]);
+    const [yearlyData, setYearlyData] = useState<GraphData[]>([]);
+    const [selectedMonth, setSelectedMonth] = useState<string>((new Date().getMonth() + 1).toString().padStart(2, '0'));
+    const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
+    const [yearSelected, setYearSelected] = useState<string>(new Date().getFullYear().toString());
 
 
-    // Sample Data for Monthly and Yearly Bookings
-    const monthlyData = [
-        { month: "Jan", bookings: 30 },
-        { month: "Feb", bookings: 50 },
-        { month: "Mar", bookings: 40 },
-        { month: "Apr", bookings: 60 },
-        { month: "May", bookings: 70 },
-        { month: "Jun", bookings: 55 },
-        { month: "Jul", bookings: 80 },
-        { month: "Aug", bookings: 90 },
-        { month: "Sep", bookings: 75 },
-        { month: "Oct", bookings: 85 },
-        { month: "Nov", bookings: 95 },
-        { month: "Dec", bookings: 100 },
-    ];
 
-    const yearlyData = [
-        { year: "2020", bookings: 500 },
-        { year: "2021", bookings: 800 },
-        { year: "2022", bookings: 1200 },
-        { year: "2023", bookings: 1500 },
-        { year: "2024", bookings: 1700 },
-    ];
 
     useEffect(() => {
         if (selectedTab === "bookings") {
             fetchBookings();
+        } else if (selectedTab === "graphs") {
+            fetchGraphData();
         }
     }, [selectedTab]);
+
+    // ### get booking related data for show bookings details ### //
 
     const fetchBookings = async () => {
         setLoading(true);
@@ -80,7 +73,6 @@ const BookingDetails: React.FC = () => {
                 params: { organizerId }
             });
 
-            // console.log(response.data, 'response for booking details');
             if (response.data && Array.isArray(response.data.bookings)) {
                 const fetchedBookings = response.data.bookings;
                 setAllBookings(fetchedBookings);
@@ -106,11 +98,12 @@ const BookingDetails: React.FC = () => {
         }
     }
 
+    // ### show data based on filter ### /// 
 
     const handleStatusFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const newStatus = e.target.value as "all" | "confirmed" | "canceled";
         setFilterStatus(newStatus);
-    
+
         // Update displayed bookings based on selected status
         switch (newStatus) {
             case "all":
@@ -125,7 +118,91 @@ const BookingDetails: React.FC = () => {
         }
     };
 
+    // ### get booking related data to show graph ### //
 
+    const fetchGraphData = async () => {
+        try {
+            setLoading(true);
+            const monthlyResponse = await axiosInstance.get(`${API_BASE_URL}/organizer/bookings/monthly`,
+                {
+                    params: {
+                        selectedMonth,
+                        selectedYear,
+                        organizerId
+                    }
+                }
+            );
+
+            if (!monthlyResponse.data || !Array.isArray(monthlyResponse.data)) {
+                console.error("Invalid monthly data:", monthlyResponse.data);
+                return;
+            }
+
+            console.log(monthlyResponse.data)
+            const bookingsByDate: Record<string, { day: number; night: number; fullDay: number }> = {};
+
+            monthlyResponse.data.forEach((entry: { _id: number; bookings: { bookingTime: string }[] }) => {
+                entry.bookings.forEach((booking: { bookingTime: string }) => { // Define type explicitly
+                    const date = entry._id || "Unknown Date";
+
+                    // Initialize the date entry if not already present
+                    if (!bookingsByDate[date]) {
+                        bookingsByDate[date] = { day: 0, night: 0, fullDay: 0 };
+                    }
+
+                    // Categorize bookings based on your database values
+                    if (booking.bookingTime === "full") {
+                        bookingsByDate[date].fullDay = 1; // Full day overrides everything
+                        bookingsByDate[date].day = 0;
+                        bookingsByDate[date].night = 0;
+                    } else if (booking.bookingTime === "day" && bookingsByDate[date].fullDay === 0) {
+                        bookingsByDate[date].day = 1;
+                    } else if (booking.bookingTime === "night" && bookingsByDate[date].fullDay === 0) {
+                        bookingsByDate[date].night = 1;
+                    }
+                });
+            });
+
+            // Convert the processed data into the format required by Recharts
+            const formattedMonthlyData = Object.keys(bookingsByDate)
+                .sort((a, b) => new Date(a).getTime() - new Date(b).getTime()) // Sort by date
+                .map((date) => ({
+                    name: date,
+                    day: bookingsByDate[date].day,
+                    night: bookingsByDate[date].night,
+                    fullDay: bookingsByDate[date].fullDay,
+                }));
+            setMonthlyData(formattedMonthlyData);
+
+
+            //API call for yearly data
+            const yearlyResponse = await axiosInstance.get(`${API_BASE_URL}/organizer/bookings/yearly`,
+                {
+                    params: {
+                        yearSelected,
+                        organizerId
+                    }
+                }
+            );
+
+            const formattedYearlyData = yearlyResponse.data.map((item: { month: string;  day: number; night: number; fullDay: number }) => ({
+                month: item.month, 
+                day: item.day,     
+                night: item.night, 
+                fullDay: item.fullDay
+            }));
+
+            setYearlyData(formattedYearlyData);
+        } catch (error) {
+            console.error("Error fetching yearly data", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchGraphData();
+    }, [selectedMonth, selectedYear, yearSelected]);
 
 
     return (
@@ -181,30 +258,29 @@ const BookingDetails: React.FC = () => {
                     </button>
 
 
-                    <div className="mt-12 mb-1 flex justify-end">
-                        <label className="mr-2 self-center">Filter by status: </label>
-                        <select
-                            value={filterStatus}
-                            onChange={handleStatusFilterChange}
-                            className="border rounded p-1"
-                        >
-                            <option value="all">All</option>
-                            <option value="confirmed">Confirmed</option>
-                            <option value="canceled">Canceled</option>
-                        </select>
-                    </div>
-
                     {/* Booking Details Tab */}
                     {selectedTab === "bookings" && (
                         <div className="mt-16">
                             <h2 className="text-xl font-semibold mb-4 text-center">Booking Details</h2>
+                            <div className="mt-12 mb-1 flex justify-end">
+                                <label className="mr-2 self-center">Filter by status: </label>
+                                <select
+                                    value={filterStatus}
+                                    onChange={handleStatusFilterChange}
+                                    className="border rounded p-1"
+                                >
+                                    <option value="all">All</option>
+                                    <option value="confirmed">Confirmed</option>
+                                    <option value="canceled">Canceled</option>
+                                </select>
+                            </div>
                             <table className="w-full border-collapse border border-gray-300">
                                 <thead>
                                     <tr className="bg-gray-100">
                                         <th className="border p-2">Booking ID</th>
                                         <th className="border p-2">Customer</th>
-                                        <th className="border p-2">Booked On</th> {/* New column for booking date */}
-                                        <th className="border p-2">Event Date</th> {/* New column for event conducting date */}
+                                        <th className="border p-2">Booked On</th>
+                                        <th className="border p-2">Event Date</th>
                                         <th className="border p-2">Contact Number</th>
                                         <th className="border p-2">Email</th>
                                         <th className="border p-2">Status</th>
@@ -237,31 +313,37 @@ const BookingDetails: React.FC = () => {
                         </div>
                     )}
 
-
                     {/* Graphs Tab */}
                     {selectedTab === "graphs" && (
                         <div className="mt-16">
+                            {/* Monthly Bookings Overview */}
                             <h2 className="text-xl font-semibold mb-4 text-center">Monthly Bookings Overview</h2>
                             <ResponsiveContainer width="100%" height={300}>
                                 <BarChart data={monthlyData}>
                                     <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="month" />
+                                    <XAxis dataKey="name" />
                                     <YAxis />
-                                    <Tooltip />
+                                    <Tooltip formatter={(value) => [value, "Bookings"]} />
                                     <Legend />
-                                    <Bar dataKey="bookings" fill="#4F46E5" />
+                                    <Bar dataKey="day" stackId="a" fill="#4F46E5" name="Day Bookings" />
+                                    <Bar dataKey="night" stackId="a" fill="#10B981" name="Night Bookings" />
+                                    <Bar dataKey="fullDay" stackId="a" fill="#E11D48" name="Full Day Bookings" />
                                 </BarChart>
                             </ResponsiveContainer>
+
 
                             <h2 className="text-xl font-semibold mt-6 mb-4 text-center">Yearly Bookings Overview</h2>
                             <ResponsiveContainer width="100%" height={300}>
                                 <BarChart data={yearlyData}>
                                     <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="year" />
+                                    <XAxis dataKey="month" />
                                     <YAxis />
                                     <Tooltip />
                                     <Legend />
-                                    <Bar dataKey="bookings" fill="#10B981" />
+                                    {/* Stacked bars */}
+                                    <Bar dataKey="day" fill="#82ca9d" name="Day Bookings" stackId="a" />
+                                    <Bar dataKey="night" fill="#8884d8" name="Night Bookings" stackId="a" />
+                                    <Bar dataKey="fullDay" fill="#10B981" name="Full Day Bookings" stackId="a" />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
