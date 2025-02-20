@@ -16,6 +16,7 @@ import RulesAndRestrictions from "../components/user/RulesRestrictions";
 import CancellationPolicy from "../components/user/CancellationPolicy";
 import HandleDates from "../pages/organizer/HandleDates";
 import BookingDetails from "../pages/organizer/Booking-Details";
+import Graph from "../components/organizer/Graphs";
 
 
 
@@ -39,6 +40,7 @@ const OrganizerRoutes: React.FC = () => {
                     <Route path="/cancellation-policy" element={<CancellationPolicy />} />
                     <Route path="/handle-dates" element={<HandleDates />} />
                     <Route path="/booking-details" element={<BookingDetails/>} />
+                    <Route path="/graph-details" element={<Graph/>}/>
                 </Route>
             </Routes>
         </ErrorBoundary>
